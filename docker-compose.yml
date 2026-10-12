@@ -1,0 +1,43 @@
+services:
+
+  auth-db:
+    image: postgres:17
+    container_name: banner-auth-db
+
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+      - ./databases/auth/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    restart: unless-stopped
+
+
+  usuarios-db:
+    image: postgres:17
+    container_name: banner-usuarios-db
+
+    environment:
+      POSTGRES_DB: usuarios_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5434:5432"
+
+    volumes:
+      - usuarios_data:/var/lib/postgresql/data
+      - ./databases/usuarios/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    restart: unless-stopped
+
+
+volumes:
+  auth_data:
+  usuarios_data:
