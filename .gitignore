@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.*
+dist/
+coverage/
+*.log
+
+# Docker/PostgreSQL local data
+postgres-data/
+data/
+
+# VS Code
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
