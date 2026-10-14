@@ -5,7 +5,7 @@ import { Sidebar } from './Sidebar'
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <Navbar />
       <MobileNav />
       <div className="mx-auto flex max-w-6xl gap-6 px-4 py-6">

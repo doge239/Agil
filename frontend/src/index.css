@@ -72,6 +72,11 @@ body,
 
 body {
   background-color: var(--background);
+  background-image: url('./assets/background.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--text);
   font-family: var(--font-sans);
 }

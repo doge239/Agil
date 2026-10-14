@@ -3,12 +3,10 @@ import type { ReactNode } from 'react'
 import { ThemeContext, THEME_KEY } from './ThemeContext'
 import type { Tema, ThemeContextValue } from './ThemeContext'
 
+// Modo oscuro desactivado temporalmente: se fuerza el tema claro.
+// Para reactivarlo, restaurar la lectura de localStorage/prefers-color-scheme.
 function obtenerTemaInicial(): Tema {
-  const guardado = localStorage.getItem(THEME_KEY)
-  if (guardado === 'light' || guardado === 'dark') {
-    return guardado
-  }
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return 'light'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
