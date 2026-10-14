@@ -38,6 +38,46 @@ services:
     restart: unless-stopped
 
 
+  catalogo-db:
+    image: postgres:17
+    container_name: banner-catalogo-db
+
+    environment:
+      POSTGRES_DB: catalogo_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5435:5432"
+
+    volumes:
+      - catalogo_data:/var/lib/postgresql/data
+      - ./databases/catalogo/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    restart: unless-stopped
+
+
+  academico-db:
+    image: postgres:17
+    container_name: banner-academico-db
+
+    environment:
+      POSTGRES_DB: academico_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5436:5432"
+
+    volumes:
+      - academico_data:/var/lib/postgresql/data
+      - ./databases/academico/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    restart: unless-stopped
+
+
 volumes:
   auth_data:
   usuarios_data:
+  catalogo_data:
+  academico_data:
