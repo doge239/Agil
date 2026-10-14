@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f5f7fa;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: #e2e8f0;
+
+  --primary: #003c71;
+  --primary-hover: #0057b8;
+  --primary-fg: #ffffff;
+
+  --accent: #c8102e;
+  --accent-fg: #ffffff;
+
+  --success: #2e7d32;
+  --warning: #f59e0b;
+  --danger: #c8102e;
+  --info: #0057b8;
+}
+
+.dark {
+  --background: #0b1b2b;
+  --surface: #13293d;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #24405a;
+
+  --primary: #4c9ee8;
+  --primary-hover: #6fb0ee;
+  --primary-fg: #06121e;
+
+  --accent: #ff5a5f;
+  --accent-fg: #1a0505;
+
+  --success: #4caf50;
+  --warning: #fbbf24;
+  --danger: #ff5a5f;
+  --info: #4c9ee8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --font-sans: "Myriad Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+}

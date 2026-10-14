@@ -76,6 +76,23 @@ services:
     restart: unless-stopped
 
 
+  frontend:
+    build: ./frontend
+    container_name: banner-frontend
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+    env_file:
+      - ./frontend/.env
+
+    restart: unless-stopped
+
+
 volumes:
   auth_data:
   usuarios_data:
