@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { useAuth } from '../context/AuthContext'
 import { getErrorMessage } from '../utils/errors'
+import { LogoUcn } from '../components/LogoUcn'
 
 export function Login() {
   const { login, autenticado } = useAuth()
@@ -37,10 +38,8 @@ export function Login() {
     <div className="flex min-h-screen items-center justify-center bg-transparent px-4">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-primary-fg">
-            UCN
-          </div>
-          <div className="text-center">
+          <LogoUcn className="h-14 w-14" />
+          <div className="rounded-lg bg-surface px-4 py-2 text-center">
             <h1 className="text-xl font-bold text-text">Banner UCN</h1>
             <p className="text-sm text-muted">Portal del estudiante</p>
           </div>
