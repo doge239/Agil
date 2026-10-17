@@ -6,14 +6,19 @@ import { Input } from '../components/Input'
 import { useAuth } from '../context/AuthContext'
 import { getErrorMessage } from '../utils/errors'
 import { LogoUcn } from '../components/LogoUcn'
+import { FullScreenLoader } from '../components/FullScreenLoader'
 
 export function Login() {
-  const { login, autenticado } = useAuth()
+  const { login, autenticado, inicializando } = useAuth()
   const navigate = useNavigate()
   const [correo, setCorreo] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [cargando, setCargando] = useState(false)
+
+  if (inicializando) {
+    return <FullScreenLoader />
+  }
 
   if (autenticado) {
     return <Navigate to="/" replace />
