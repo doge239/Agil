@@ -100,8 +100,3 @@ Todas las rutas salvo `/login` están protegidas y requieren sesión.
 1. El login guarda el `token` en `localStorage` y el usuario en `AuthContext`.
 2. Axios inyecta `Authorization: Bearer <token>` en cada petición.
 3. Ante un `401`, se limpia la sesión y se redirige a `/login`.
-
-## Tema
-
-Soporte de modo claro/oscuro mediante la estrategia `class` de Tailwind, con toggle en la
-navbar y preferencia persistida en `localStorage`.
