@@ -2,6 +2,9 @@ import api from './axios'
 import type { Avance, Encuesta, OfertaCurso, Restriccion, Solicitud } from '../types/api'
 export async function getOferta(periodo?:number) { return (await api.get<{oferta:OfertaCurso[]}>('/academico/oferta',{params:{periodo}})).data }
 export async function inscribir(id_curso:number) { return (await api.post('/academico/inscripciones',{id_curso})).data }
+export async function unirseListaEspera(id_curso:number) { return (await api.post('/academico/lista-espera',{id_curso})).data }
+export async function salirListaEspera(id_curso:number) { return (await api.delete(`/academico/lista-espera/${id_curso}`)).data }
+export async function retirarInscripcion(id_curso:number) { return (await api.delete(`/academico/inscripciones/${id_curso}`)).data }
 export async function getAvance() { return (await api.get<Avance>('/academico/avance-curricular')).data }
 export async function getSolicitudes() {
   const [r,s]=await Promise.all([api.get<{restricciones:Restriccion[]}>('/academico/restricciones'),api.get<{solicitudes:Solicitud[]}>('/academico/solicitudes')])

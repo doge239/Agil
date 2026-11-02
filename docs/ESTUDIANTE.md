@@ -49,6 +49,12 @@ quieren ejecutar sus pruebas dentro de Docker. Las pruebas no necesitan Docker.
 - Inscripción está cerrada por defecto. Administración General debe habilitarla explícitamente.
   Requiere curso y período activos, asignatura activa del plan, cupo, ausencia de duplicados
   o asignaturas aprobadas, prerrequisitos aprobados y horario compatible.
+- Si el curso está lleno, el estudiante que cumple esas mismas reglas puede entrar a una lista
+  de espera ordenada por fecha. Al retirarse alguien o aumentar Administración de Unidad los cupos,
+  se inscribe automáticamente a la primera persona de la lista que todavía cumple los requisitos;
+  quienes dejaron de cumplirlos se omiten y quedan registrados como no elegibles. El retiro voluntario
+  está disponible mientras la inscripción del período permanezca abierta. Las anulaciones conservan
+  el historial y cada alta, retiro y promoción queda auditada.
 - Las restricciones con unidad nula son globales; las demás solo afectan cursos de esa unidad.
   Administración de Unidad solo puede resolver las de su unidad. Las globales requieren
   Administración General. Nadie puede resolver su propia solicitud.
@@ -85,6 +91,9 @@ Todas las rutas pasan por `/api/academico` en el gateway y exigen Bearer JWT.
 | GET | `/periodos` | Selector |
 | GET | `/oferta?periodo=1` | Cursos del plan y cupos |
 | POST | `/inscripciones` | `{ "id_curso": 1 }` |
+| DELETE | `/inscripciones/:idCurso` | Retiro propio mientras la inscripción del período esté abierta |
+| POST | `/lista-espera` | `{ "id_curso": 1 }`, solo si el curso está lleno y cumples los requisitos |
+| DELETE | `/lista-espera/:idCurso` | Salir de la lista de espera propia |
 | GET | `/avance-curricular` | Progreso acumulado |
 | GET | `/restricciones` | Restricciones propias |
 | GET/POST | `/solicitudes` | Consultar / crear con `id_restriccion`, `motivo` |

@@ -72,14 +72,52 @@ exports.obtenerOferta=estudiante(async(req,res,p)=> {
   const r=await pool.query(`SELECT c.*,(p.inscripcion_abierta AND p.estado='ACTIVO') AS inscripcion_abierta,
     c.cupo_maximo-(SELECT count(*)::int FROM inscripcion i WHERE i.id_curso=c.id_curso AND i.estado='ACTIVA') AS cupos_disponibles,
     EXISTS(SELECT 1 FROM inscripcion i WHERE i.id_curso=c.id_curso AND i.id_estudiante=$2 AND i.estado='ACTIVA') AS inscrito,
+    le.estado AS lista_espera_estado,
+    CASE WHEN le.estado='ESPERA' THEN (SELECT count(*)::int+1 FROM lista_espera anterior
+      WHERE anterior.id_curso=c.id_curso AND anterior.estado='ESPERA'
+      AND (anterior.fecha_creacion<le.fecha_creacion OR (anterior.fecha_creacion=le.fecha_creacion AND anterior.id_lista_espera<le.id_lista_espera)))
+      ELSE NULL END AS posicion_espera,
     COALESCE((SELECT json_agg(h ORDER BY h.dia_semana,h.hora_inicio) FROM horario h WHERE h.id_curso=c.id_curso),'[]') AS horarios
-    FROM curso c JOIN periodo_academico p USING(id_periodo) WHERE c.id_periodo=$1 AND c.estado='ACTIVO' AND c.id_asignatura=ANY($3::int[]) ORDER BY c.id_asignatura,c.seccion`,[per.id_periodo,p.id_estudiante,m.malla.map(a=>a.id_asignatura)]);
+    FROM curso c JOIN periodo_academico p USING(id_periodo)
+    LEFT JOIN LATERAL (SELECT id_lista_espera,estado,fecha_creacion FROM lista_espera
+      WHERE id_curso=c.id_curso AND id_estudiante=$2 ORDER BY fecha_creacion DESC,id_lista_espera DESC LIMIT 1) le ON true
+    WHERE c.id_periodo=$1 AND c.estado='ACTIVO' AND c.id_asignatura=ANY($3::int[]) ORDER BY c.id_asignatura,c.seccion`,[per.id_periodo,p.id_estudiante,m.malla.map(a=>a.id_asignatura)]);
   res.json({oferta:await enriquecer(req,r.rows.filter(c=>cat.some(a=>a.id_asignatura===c.id_asignatura&&a.estado==='ACTIVA'))),periodo:per});
 });
 exports.inscribir=estudiante(async(req,res,p)=> {
-  const id=idPositivo(req.body.id_curso,'Curso'); const m=await plan(req,p); const cat=await catalogo(req);
+  const id=idPositivo(req.body.id_curso,'Curso');
+  const enEspera=await pool.query("SELECT 1 FROM lista_espera WHERE id_estudiante=$1 AND id_curso=$2 AND estado='ESPERA'",[p.id_estudiante,id]);
+  await require('../domain/lista-espera').promoverListaEspera(req,id);
+  if(enEspera.rowCount){
+    const previa=await pool.query("SELECT * FROM inscripcion WHERE id_estudiante=$1 AND id_curso=$2 AND estado='ACTIVA'",[p.id_estudiante,id]);
+    if(previa.rowCount)return res.json({inscripcion:previa.rows[0],mensaje:'Fuiste inscrito automáticamente desde la lista de espera'});
+  }
+  const m=await plan(req,p); const cat=await catalogo(req);
   const inscripcion=await require('../domain/inscripcion').inscribirCurso({req,p,m,cat,id});
   res.status(201).json({inscripcion,mensaje:'Inscripción realizada'});
+});
+exports.agregarListaEspera=estudiante(async(req,res,p)=>{
+  const id=idPositivo(req.body.id_curso,'Curso');
+  await require('../domain/lista-espera').promoverListaEspera(req,id);
+  const m=await plan(req,p);const cat=await catalogo(req);
+  const entrada=await require('../domain/inscripcion').agregarListaEspera({req,p,m,cat,id});
+  res.status(201).json({entrada,mensaje:'Te agregaste a la lista de espera'});
+});
+exports.cancelarListaEspera=estudiante(async(req,res,p)=>{
+  const id=idPositivo(req.params.idCurso,'Curso');
+  await require('../domain/inscripcion').cancelarListaEspera({req,p,id});
+  res.json({mensaje:'Saliste de la lista de espera'});
+});
+exports.retirarInscripcion=estudiante(async(req,res,p)=>{
+  const id=idPositivo(req.params.idCurso,'Curso');
+  const resultado=await require('../domain/inscripcion').retirarInscripcion({req,p,id});
+  try{
+    const promovidos=await require('../domain/lista-espera').promoverListaEspera(req,id);
+    res.json({mensaje:'Te retiraste de la asignatura',promovidos});
+  }catch(e){
+    console.error(`Retiro realizado; promoción pendiente para curso ${id}: ${e.message}`);
+    res.json({mensaje:'Retiro realizado, pero la promoción automática quedó pendiente. Recarga la oferta más tarde o contacta a administración.',promocion_pendiente:true});
+  }
 });
 exports.obtenerAvance=estudiante(async(req,res,p)=> {
   const m=await plan(req,p); const finales=await resultados(pool,p.id_estudiante);
