@@ -100,6 +100,7 @@ services:
       - ./databases/migrations/academico/004_admin_unidad.sql:/docker-entrypoint-initdb.d/zz_004_admin_unidad.sql:ro
       - ./databases/migrations/academico/005_avance_curricular.sql:/docker-entrypoint-initdb.d/zz_005_avance_curricular.sql:ro
       - ./databases/migrations/academico/006_admin_general.sql:/docker-entrypoint-initdb.d/zz_006_admin_general.sql:ro
+      - ./databases/migrations/academico/006_lista_espera.sql:/docker-entrypoint-initdb.d/zz_006_lista_espera.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]

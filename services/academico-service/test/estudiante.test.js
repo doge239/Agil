@@ -33,6 +33,7 @@ before(async()=> {
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/004_admin_unidad.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/005_avance_curricular.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/006_admin_general.sql'),'utf8'));
+    if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/006_lista_espera.sql'),'utf8'));
     if(nombre==='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/catalogo/001_avance_iti.sql'),'utf8'));
     if(nombre==='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/catalogo/003_admin_general.sql'),'utf8'));
   }
@@ -82,6 +83,8 @@ test('JWT y rol protegen todas las operaciones estudiantiles',async()=> {
   assert.equal((await peticion('/asignaturas?periodo=999')).status,404);
   assert.equal((await peticion('/avance-curricular',{autorizado:false})).status,401);
   assert.equal((await peticion('/avance-curricular',{roles:['DOCENTE']})).status,403);
+  assert.equal((await peticion('/lista-espera',{autorizado:false,method:'POST',body:{id_curso:5}})).status,401);
+  assert.equal((await peticion('/lista-espera',{roles:['DOCENTE'],method:'POST',body:{id_curso:5}})).status,403);
 });
 test('períodos, notas pendientes y asistencia no filtran datos de otro estudiante',async()=> {
   assert.equal((await peticion('/asignaturas?periodo=1')).data.asignaturas.length,3);
@@ -126,6 +129,43 @@ test('inscripción valida restricciones, cupo, duplicados, prerrequisitos y choq
   await db.exec("INSERT INTO horario(id_curso,dia_semana,hora_inicio,hora_fin) VALUES(5,'Lunes','09:00','10:00'),(6,'Lunes','09:30','10:30')");
   assert.equal((await peticion('/inscripciones',{id:2,method:'POST',body:{id_curso:6}})).status,409);
   assert.equal((await db.query('SELECT cupo_actual FROM curso WHERE id_curso=5')).rows[0].cupo_actual,1);
+  await usuarios.exec(`INSERT INTO persona(id_usuario,nombres,apellido_paterno,correo_institucional) VALUES
+    (6,'Primera','Espera','espera1@test'),(7,'Tercera','Espera','espera3@test');
+    INSERT INTO estudiante(id_persona,numero_matricula,id_carrera,id_plan)
+      SELECT id_persona,'ESPERA-'||id_usuario,1,1 FROM persona WHERE id_usuario IN (6,7);`);
+  const primerEstudiante=(await usuarios.query('SELECT id_estudiante FROM estudiante e JOIN persona p USING(id_persona) WHERE p.id_usuario=6')).rows[0].id_estudiante;
+  const estudiante=(await usuarios.query('SELECT id_estudiante FROM estudiante e JOIN persona p USING(id_persona) WHERE p.id_usuario=5')).rows[0].id_estudiante;
+  assert.equal((await peticion('/lista-espera',{id:6,method:'POST',body:{id_curso:5}})).status,201);
+  const altaGateway=await fetch(`${base}/api/academico/lista-espera`,{method:'POST',headers:{Authorization:`Bearer ${token(5)}`,'Content-Type':'application/json'},body:JSON.stringify({id_curso:5})});
+  assert.equal(altaGateway.status,201);
+  assert.equal((await peticion('/lista-espera',{id:5,method:'POST',body:{id_curso:5}})).status,409);
+  const oferta=(await peticion('/oferta?periodo=1',{id:5})).data.oferta.find(c=>c.id_curso===5);
+  assert.equal(oferta.lista_espera_estado,'ESPERA');assert.equal(oferta.posicion_espera,2);
+  await db.query("INSERT INTO restriccion(id_estudiante,tipo,id_unidad) VALUES($1,'Nueva restricción',1)",[primerEstudiante]);
+  const gateway=await fetch(`${base}/api/academico/inscripciones/5`,{method:'DELETE',headers:{Authorization:`Bearer ${token(2)}`}});
+  assert.equal(gateway.status,200);
+  assert.equal((await db.query("SELECT estado FROM lista_espera WHERE id_estudiante=$1 AND id_curso=5 ORDER BY id_lista_espera DESC LIMIT 1",[primerEstudiante])).rows[0].estado,'NO_ELEGIBLE');
+  assert.equal((await db.query("SELECT estado FROM lista_espera WHERE id_estudiante=$1 AND id_curso=5 ORDER BY id_lista_espera DESC LIMIT 1",[estudiante])).rows[0].estado,'PROMOVIDA');
+  assert.equal((await db.query("SELECT estado FROM inscripcion WHERE id_estudiante=$1 AND id_curso=5",[estudiante])).rows[0].estado,'ACTIVA');
+  const promovida=(await peticion('/oferta?periodo=1',{id:5})).data.oferta.find(c=>c.id_curso===5);
+  assert.equal(promovida.inscrito,true);assert.equal(promovida.lista_espera_estado,'PROMOVIDA');
+  const tercero=(await usuarios.query('SELECT id_estudiante FROM estudiante e JOIN persona p USING(id_persona) WHERE p.id_usuario=7')).rows[0].id_estudiante;
+  assert.equal((await peticion('/lista-espera',{id:7,method:'POST',body:{id_curso:5}})).status,201);
+  const salidaGateway=await fetch(`${base}/api/academico/lista-espera/5`,{method:'DELETE',headers:{Authorization:`Bearer ${token(7)}`}});
+  assert.equal(salidaGateway.status,200);
+  assert.equal((await db.query("SELECT estado FROM lista_espera WHERE id_estudiante=$1 AND id_curso=5 ORDER BY id_lista_espera DESC LIMIT 1",[tercero])).rows[0].estado,'CANCELADA');
+  assert.equal((await peticion('/lista-espera',{id:7,method:'POST',body:{id_curso:5}})).status,201);
+  const aumento=await fetch(`${base}/api/academico/unidad/cursos/5`,{method:'PATCH',headers:{Authorization:`Bearer ${token(3,['ADMIN_UNIDAD'])}`,'Content-Type':'application/json'},body:JSON.stringify({cupo_maximo:2,estado:'ACTIVO',version:1})});
+  assert.equal(aumento.status,200);assert.equal((await aumento.json()).promovidos,1);
+  assert.equal((await db.query("SELECT estado FROM lista_espera WHERE id_estudiante=$1 AND id_curso=5 ORDER BY id_lista_espera DESC LIMIT 1",[tercero])).rows[0].estado,'PROMOVIDA');
+  assert.equal((await db.query("SELECT cupo_actual FROM curso WHERE id_curso=5")).rows[0].cupo_actual,2);
+  await db.query("UPDATE inscripcion SET estado='ANULADA' WHERE id_curso=5 AND id_estudiante IN ($1,$2)",[estudiante,tercero]);
+  await db.query("UPDATE inscripcion SET estado='ACTIVA' WHERE id_curso=5 AND id_estudiante=2");
+  await db.query("DELETE FROM lista_espera WHERE id_curso=5");
+  await db.query("UPDATE curso SET cupo_maximo=1,cupo_actual=1,version=1 WHERE id_curso=5");
+  await db.query("DELETE FROM restriccion WHERE id_estudiante=$1 AND tipo='Nueva restricción'",[primerEstudiante]);
+  await usuarios.query('DELETE FROM estudiante WHERE id_estudiante IN ($1,$2)',[primerEstudiante,tercero]);
+  await usuarios.query('DELETE FROM persona WHERE id_usuario IN (6,7)');
 });
 test('avance depende de resultados finales y cuenta créditos una sola vez',async()=> {
   const inicial=await peticion('/avance-curricular');assert.equal(inicial.data.creditos_aprobados,0);

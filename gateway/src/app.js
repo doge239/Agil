@@ -148,9 +148,11 @@ app.get("/api/academico/asistencia", (req, res) => {
 for (const ruta of ['periodos','oferta','avance-curricular','restricciones','solicitudes','encuestas','certificados','certificados/:tipo','administracion/solicitudes']) {
   app.get(`/api/academico/${ruta}`,(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 }
-for (const ruta of ['inscripciones','solicitudes','encuestas/:idEncuesta/respuestas','administracion/encuestas']) {
+for (const ruta of ['inscripciones','lista-espera','solicitudes','encuestas/:idEncuesta/respuestas','administracion/encuestas']) {
   app.post(`/api/academico/${ruta}`,(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 }
+app.delete('/api/academico/inscripciones/:idCurso',(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
+app.delete('/api/academico/lista-espera/:idCurso',(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 app.patch('/api/academico/administracion/solicitudes/:idSolicitud',(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 app.patch('/api/academico/administracion/periodos/:idPeriodo/inscripcion',(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 app.put('/api/academico/administracion/inscripciones/:idInscripcion/resultado',(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));

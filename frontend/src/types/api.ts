@@ -149,6 +149,8 @@ export interface AsistenciaResponse {
 export interface Plan { id_plan:number; id_carrera:number; nombre:string; anio_inicio:number; estado:string }
 export interface OfertaCurso extends AsignaturaInscrita {
   cupos_disponibles:number; inscrito:boolean; inscripcion_abierta:boolean; horarios:HorarioItem[]
+  lista_espera_estado:'ESPERA'|'PROMOVIDA'|'CANCELADA'|'NO_ELEGIBLE'|null
+  posicion_espera:number|null
 }
 export interface Restriccion { id_restriccion:number; tipo:string; descripcion:string|null; activa:boolean }
 export interface Solicitud { id_solicitud:number; id_restriccion:number; tipo:string; motivo:string; estado:string; fecha_creacion:string; resolucion:string|null; fecha_resolucion:string|null }

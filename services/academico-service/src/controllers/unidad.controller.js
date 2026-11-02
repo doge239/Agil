@@ -63,13 +63,22 @@ exports.crearCurso=unidad(async(req,res,p)=> {
 });
 exports.editarCurso=unidad(async(req,res,p)=>{
   const cupo=idPositivo(req.body.cupo_maximo,'Cupo');exigir(['ACTIVO','INACTIVO'].includes(req.body.estado),400,'Estado inválido');
-  const nuevo=await transaccion(async db=>{
+  const {curso:nuevo,cupoAumentado}=await transaccion(async db=>{
     const c=await curso(req,p,db,true);version(c.version,req.body.version);
     const inscritos=(await db.query("SELECT count(*)::int AS n FROM inscripcion WHERE id_curso=$1 AND estado='ACTIVA'",[c.id_curso])).rows[0].n;
     exigir(cupo>=inscritos,409,'El cupo no puede ser menor que los inscritos');exigir(req.body.estado==='ACTIVO'||inscritos===0,409,'No puedes desactivar un curso con inscripciones activas');
     const r=await db.query('UPDATE curso SET cupo_maximo=$2,estado=$3,cupo_actual=$4,version=version+1 WHERE id_curso=$1 RETURNING *',[c.id_curso,cupo,req.body.estado,inscritos]);
-    await auditar(db,req,'UNIDAD_EDITAR_CURSO',{id_curso:c.id_curso,anterior:c,nuevo:r.rows[0]});return r.rows[0];
-  });res.json({curso:nuevo});
+    await auditar(db,req,'UNIDAD_EDITAR_CURSO',{id_curso:c.id_curso,anterior:c,nuevo:r.rows[0]});
+    return {curso:r.rows[0],cupoAumentado:cupo>c.cupo_maximo};
+  });
+  let promovidos=0,promocionPendiente=false;
+  if(cupoAumentado)try{
+    promovidos=await require('../domain/lista-espera').promoverListaEspera(req,nuevo.id_curso);
+  }catch(e){
+    console.error(`Cupo actualizado; promoción pendiente para curso ${nuevo.id_curso}: ${e.message}`);
+    promocionPendiente=true;
+  }
+  res.json({curso:nuevo,promovidos,promocion_pendiente:promocionPendiente});
 });
 exports.docente=unidad(async(req,res,p)=>{
   const id=idPositivo(req.params.idDocente,'Docente');const datos=await remoto(req,'USUARIOS_SERVICE_URL',`/usuarios/unidad/docentes?id=${id}`);exigir(datos.docentes.length,403,'El docente no pertenece a tu unidad');
