@@ -162,6 +162,8 @@ services:
     depends_on:
       usuarios-db:
         condition: service_healthy
+      datos-demo:
+        condition: service_completed_successfully
 
     restart: unless-stopped
 
@@ -190,6 +192,8 @@ services:
     depends_on:
       catalogo-db:
         condition: service_healthy
+      datos-demo:
+        condition: service_completed_successfully
 
     restart: unless-stopped
 
@@ -220,6 +224,8 @@ services:
     depends_on:
       academico-db:
         condition: service_healthy
+      datos-demo:
+        condition: service_completed_successfully
       usuarios-service:
         condition: service_started
       catalogo-service:
@@ -274,6 +280,30 @@ services:
 
     command: ["node", "src/scripts/crearUsuario.js"]
 
+    restart: "no"
+
+
+  # Migraciones y escenarios reproducibles para todo el equipo, incluso con volúmenes existentes.
+  datos-demo:
+    build: ./services/auth-service
+    environment:
+      DB_HOST: auth-db
+      DB_PORT: 5432
+      DB_NAME: auth_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    volumes:
+      - ./databases:/app/databases:ro
+    depends_on:
+      auth-seed:
+        condition: service_completed_successfully
+      usuarios-db:
+        condition: service_healthy
+      catalogo-db:
+        condition: service_healthy
+      academico-db:
+        condition: service_healthy
+    command: ["node", "src/scripts/prepararDatosDemo.js"]
     restart: "no"
 
 

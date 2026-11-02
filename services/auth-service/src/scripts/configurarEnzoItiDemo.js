@@ -1,5 +1,5 @@
 // Escenario solicitado para la cuenta local de Enzo: I–VI aprobados, VII inscrito, VIII pendiente.
-// No se ejecuta al iniciar; conserva cursos y registros previos de otros estudiantes.
+// Compose lo ejecuta al preparar los datos compartidos de desarrollo.
 async function configurar({usuarios,catalogo,academico,idUsuario}) {
   const persona = (await usuarios.query(`SELECT p.*,e.id_estudiante,e.numero_matricula,e.id_plan,e.id_carrera
     FROM persona p JOIN estudiante e USING(id_persona) WHERE p.id_usuario=$1`,[idUsuario])).rows[0];

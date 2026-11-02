@@ -29,7 +29,10 @@ node databases/migrate.js academico
 El ejecutor registra la versión y omite migraciones ya aplicadas. No guarda credenciales.
 Reiniciar los servicios después de aplicar ambas migraciones. Compose monta las mismas
 migraciones después de `init.sql` para bases **nuevas**; no las aplica automáticamente
-sobre volúmenes existentes. No es necesario migrar Catálogo.
+sobre volúmenes existentes por sí solos. El servicio `datos-demo` ahora aplica las migraciones
+pendientes de Usuarios, Catálogo y Académico también a volúmenes existentes, y prepara el
+escenario compartido antes de iniciar los servicios dependientes. Para el arranque habitual
+basta `docker compose up -d --build`; ver [Datos compartidos](DATOS_COMPARTIDOS.md).
 
 La dependencia de desarrollo PGlite requiere reconstruir la imagen de Académico si se
 quieren ejecutar sus pruebas dentro de Docker. Las pruebas no necesitan Docker.

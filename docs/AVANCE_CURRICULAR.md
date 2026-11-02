@@ -116,7 +116,9 @@ ITI y configurado con un escenario de prueba: **39 ramos de I–VI aprobados**, 
 inscritos** y **Capstone pendiente**. Las aprobaciones de ejemplo usan nota 5,5. Se mantiene
 la cuenta y contraseña existentes. La cuenta separada `iti.demo@ucn.cl` conserva su escenario.
 
-El script reproducible es:
+Docker Compose prepara este escenario automáticamente mediante `datos-demo` al ejecutar
+`docker compose up -d --build`. Ver [Datos compartidos](DATOS_COMPARTIDOS.md).
+Para ejecutarlo individualmente, el script reproducible es:
 
 ```powershell
 docker compose exec -T auth-service node src/scripts/configurarEnzoItiDemo.js

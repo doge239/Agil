@@ -5,8 +5,10 @@ const path = require('node:path');
 async function main() {
   const dominio=process.argv[2];
   if(!['usuarios','academico','catalogo'].includes(dominio)) throw new Error('Uso: node databases/migrate.js usuarios|academico|catalogo');
-  require(path.resolve(__dirname,`../services/${dominio}-service/node_modules/dotenv`)).config({path:path.resolve(__dirname,`../services/${dominio}-service/.env`),quiet:true});
-  const {Client}=require(path.resolve(__dirname,`../services/${dominio}-service/node_modules/pg`));
+  // En Docker se comparten las dependencias del servicio que ejecuta la preparación.
+  const dependencias=process.env.MIGRATION_NODE_MODULES || path.resolve(__dirname,`../services/${dominio}-service/node_modules`);
+  require(path.join(dependencias,'dotenv')).config({path:path.resolve(__dirname,`../services/${dominio}-service/.env`),quiet:true});
+  const {Client}=require(path.join(dependencias,'pg'));
   const db=new Client({host:process.env.DB_HOST||'localhost',port:Number(process.env.DB_PORT||({usuarios:5434,catalogo:5435,academico:5436}[dominio])),database:process.env.DB_NAME||`${dominio}_db`,user:process.env.DB_USER||'postgres',password:process.env.DB_PASSWORD});
   await db.connect();
   try {

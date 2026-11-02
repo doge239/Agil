@@ -64,7 +64,7 @@ Agil/
 ```
 
 
-ok## Levantar el proyecto
+## Levantar el proyecto
 
 Todo el sistema (bases de datos, microservicios, gateway y frontend) se levanta con Docker Compose.
 
@@ -85,6 +85,18 @@ El orden de arranque está resuelto con `depends_on` y healthchecks: primero las
 (cada una ejecuta su `databases/<servicio>/init.sql` la primera vez), luego los microservicios, el
 gateway y el frontend. El servicio `auth-seed` crea el usuario de prueba automáticamente al
 arrancar (y es idempotente: si ya existe, no falla).
+
+El servicio `datos-demo` aplica las migraciones pendientes y carga los datos compartidos
+antes de iniciar Usuarios, Catálogo y Académico. Todos reciben la cuenta
+`estudiante@ucn.cl` / `123456` con el plan ITI, **39 ramos aprobados**, **7 inscritos**,
+**Capstone pendiente** y **11 sesiones de horario**. También prepara `iti.demo@ucn.cl`
+con su escenario independiente. Son datos de demostración versionados en el repositorio.
+
+Quienes ya tienen el proyecto solo deben actualizar el código y ejecutar
+`docker compose up -d --build`; se conservan los volúmenes, las contraseñas y los resultados
+existentes. No es necesario borrar las bases. Las modificaciones que cada integrante haga
+después en su base local no se sincronizan. Detalles y solución de problemas:
+[Datos compartidos](docs/DATOS_COMPARTIDOS.md).
 
 ### 3. Detener / reiniciar
 
