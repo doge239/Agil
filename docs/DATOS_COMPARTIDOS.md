@@ -17,12 +17,19 @@ una reprobación y asignaturas de quinto semestre inscritas.
 
 ## Archivos que generan los datos
 
+La preparación compartida crea también `admin.general@ucn.cl` con contraseña inicial
+`123456`, su rol `ADMIN_GENERAL`, la persona «Administrador General Demo» y su perfil
+en `administrador_general`. Funciona con bases nuevas y existentes, sin duplicar cuentas
+ni cambiar contraseñas existentes. Cada integrante debe actualizar el código y ejecutar
+`docker compose up -d --build` para incorporar esta cuenta a su propia base.
+
 - `databases/*/init.sql`: estructura y registros iniciales de las cuatro bases.
 - `databases/migrations/`: ampliaciones del esquema y malla ITI.
 - `services/auth-service/src/scripts/crearUsuario.js`: cuenta principal y rol.
 - `services/auth-service/src/scripts/configurarEnzoItiDemo.js`: plan, resultados,
   electivos, inscripciones y horario del estudiante principal.
 - `services/auth-service/src/scripts/crearEstudianteItiDemo.js`: segunda cuenta de prueba.
+- `services/auth-service/src/scripts/crearAdminGeneralDemo.js`: cuenta y perfil de Administración General.
 - `services/auth-service/src/scripts/prepararDatosDemo.js`: coordina migraciones y escenarios.
 
 Compose ejecuta `auth-seed` y luego `datos-demo` cuando las bases están listas. Los servicios

@@ -107,10 +107,12 @@ docker compose up -d --build
 docker compose exec -T auth-service node src/scripts/crearAdminGeneralDemo.js
 ```
 
-Cuenta local: `admin.general@ucn.cl` / `123456`. El aprovisionamiento es explícito y
+Cuenta compartida de desarrollo: `admin.general@ucn.cl` / `123456`. El aprovisionamiento es automático mediante `datos-demo` y
 repetible; conserva contraseñas e identidades existentes y rechaza una cuenta que no
 tenga el rol esperado. Auth y Usuarios usan transacciones independientes; si falla el
-segundo paso se puede repetir para completar el perfil. No se crea en cada arranque.
+segundo paso se puede repetir para completar el perfil. Cada integrante obtiene la cuenta
+en su base al actualizar el código y ejecutar `docker compose up -d --build`.
+El comando individual anterior permite repararla sin repetir todos los escenarios.
 
 Para aplicar solamente la migración desde Node local con las variables de conexión
 configuradas: `node databases/migrate.js academico` y

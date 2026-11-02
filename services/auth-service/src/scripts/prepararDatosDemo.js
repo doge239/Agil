@@ -20,9 +20,10 @@ try {
       DB_NAME: `${dominio}_db`,
     });
   }
+  ejecutar(path.join(__dirname, 'crearAdminGeneralDemo.js'));
   ejecutar(path.join(__dirname, 'configurarEnzoItiDemo.js'));
   ejecutar(path.join(__dirname, 'crearEstudianteItiDemo.js'));
-  console.log('Datos compartidos listos: estudiante@ucn.cl e iti.demo@ucn.cl.');
+  console.log('Datos compartidos listos: estudiante@ucn.cl, iti.demo@ucn.cl y admin.general@ucn.cl.');
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;
