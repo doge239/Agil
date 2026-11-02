@@ -31,6 +31,8 @@ before(async()=> {
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/002_asignacion_familiar.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/003_docente.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/004_admin_unidad.sql'),'utf8'));
+    if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/005_avance_curricular.sql'),'utf8'));
+    if(nombre==='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/catalogo/001_avance_iti.sql'),'utf8'));
   }
   await usuarios.exec(`INSERT INTO persona(id_usuario,nombres,apellido_paterno,correo_institucional) VALUES(2,'Otro','Estudiante','otro@test'),(3,'Admin','Unidad','admin@test'),(4,'Admin','Otra','otra@test');
     INSERT INTO estudiante(id_persona,numero_matricula,id_carrera,id_plan) VALUES(2,'OTRO',1,1);
@@ -76,10 +78,16 @@ test('JWT y rol protegen todas las operaciones estudiantiles',async()=> {
   assert.equal((await peticion('/asignaturas',{roles:['DOCENTE']})).status,403);
   assert.equal((await peticion('/asignaturas?periodo=abc')).status,400);
   assert.equal((await peticion('/asignaturas?periodo=999')).status,404);
+  assert.equal((await peticion('/avance-curricular',{autorizado:false})).status,401);
+  assert.equal((await peticion('/avance-curricular',{roles:['DOCENTE']})).status,403);
 });
 test('períodos, notas pendientes y asistencia no filtran datos de otro estudiante',async()=> {
   assert.equal((await peticion('/asignaturas?periodo=1')).data.asignaturas.length,3);
   assert.equal((await peticion('/asignaturas?periodo=2')).data.asignaturas.length,0);
+  const horario=await peticion('/horario?periodo=1');
+  assert.equal(horario.data.horario.find(h=>h.id_asignatura===1).nombre,'Bases de Datos');
+  assert.equal(horario.headers.get('cache-control'),'no-store');
+  assert.equal((await peticion('/horario?periodo=1&id_estudiante=1',{id:2})).data.horario.length,0);
   assert.equal((await peticion('/notas?periodo=1')).data.notas.find(n=>n.evaluacion==='Pendiente').nota,null);
   assert.equal((await peticion('/notas?periodo=1',{id:2})).data.notas.length,0);
   assert.ok((await peticion('/asistencia?periodo=1')).data.asistencia.some(a=>a.estado==='PENDIENTE'));
@@ -123,6 +131,10 @@ test('avance depende de resultados finales y cuenta créditos una sola vez',asyn
   assert.equal((await peticion('/administracion/inscripciones/1/resultado',{id:4,roles:['ADMIN_UNIDAD'],method:'PUT',body:{nota:5.5,nota_minima:4}})).status,403);
   assert.equal((await peticion('/administracion/inscripciones/1/resultado',{id:3,roles:['ADMIN_UNIDAD'],method:'PUT',body:{nota:5.5,nota_minima:4}})).status,200);
   const avance=await peticion('/avance-curricular');assert.equal(avance.data.creditos_aprobados,5);
+  const otro=await peticion('/avance-curricular?id_estudiante=1',{id:2});
+  assert.equal(otro.data.creditos_aprobados,0);
+  assert.equal(otro.headers.get('cache-control'),'no-store');
+  assert.ok(otro.data.asignaturas.every(a=>a.nota===null));
   const a=progreso([{id_asignatura:1,creditos:5}],[{id_asignatura:1,nota:3,nota_minima:4},{id_asignatura:1,nota:5,nota_minima:4}],[]);assert.equal(a.creditos_aprobados,5);
 });
 test('encuestas: habilitación administrativa, plazo, propiedad y respuesta única',async()=> {
@@ -324,4 +336,26 @@ test('Unidad: restricciones propias, levantamiento y seguimiento estudiantil',as
   const estado=(await peticion('/solicitudes',{id:5})).data.solicitudes.find(s=>s.id_restriccion===restriccion.id_restriccion);assert.equal(estado.estado,'APROBADA');
   assert.equal((await peticion(ruta,{...opciones,method:'PATCH',body:{version:1,motivo:'Repetición de una operación'}})).status,409);
   const gateway=await fetch(`${base}/api/academico/unidad/cursos?periodo=1`,{headers:{Authorization:`Bearer ${token(3,['ADMIN_UNIDAD'])}`}});assert.equal(gateway.status,200);
+});
+
+test('Avance: estudiante sin historial y requisitos por confirmar también se respetan al inscribir',async()=> {
+  await usuarios.exec("INSERT INTO persona(id_usuario,nombres,apellido_paterno,correo_institucional) VALUES(99,'Sin','Historial','sin-historial@test'); INSERT INTO estudiante(id_persona,numero_matricula,id_carrera,id_plan) SELECT id_persona,'SIN-HISTORIAL',1,1 FROM persona WHERE id_usuario=99");
+  const inicial=await peticion('/avance-curricular?id_estudiante=1&id_plan=999',{id:99});
+  assert.equal(inicial.status,200);
+  assert.equal(inicial.data.plan.id_plan,1);
+  assert.equal(inicial.data.sin_historial,true);
+  assert.ok(inicial.data.asignaturas.every(a=>a.estado==='PENDIENTE'&&a.nota===null));
+  await catalogo.exec("UPDATE malla_curricular SET requisitos_estado='POR_CONFIRMAR' WHERE id_plan=1 AND id_asignatura=2");
+  try {
+    const per=(await db.query("INSERT INTO periodo_academico(anio,semestre,fecha_inicio,fecha_fin,inscripcion_abierta) VALUES(2030,1,CURRENT_DATE-90,CURRENT_DATE+90,true) RETURNING id_periodo")).rows[0];
+    const curso=(await db.query('INSERT INTO curso(id_asignatura,id_periodo,id_unidad,seccion,cupo_maximo) VALUES(2,$1,1,101,30) RETURNING id_curso',[per.id_periodo])).rows[0];
+    const avance=await peticion('/avance-curricular',{id:99});
+    assert.equal(avance.data.asignaturas.find(a=>a.id_asignatura===2).disponibilidad,'POR_CONFIRMAR');
+    const inscripcion=await peticion('/inscripciones',{id:99,method:'POST',body:{id_curso:curso.id_curso}});
+    assert.equal(inscripcion.status,409);
+    assert.match(inscripcion.data.mensaje,/por confirmar/);
+    assert.equal((await peticion('/avance-curricular',{id:99})).data.sin_historial,true);
+  } finally {
+    await catalogo.exec("UPDATE malla_curricular SET requisitos_estado='CONFIRMADOS' WHERE id_plan=1 AND id_asignatura=2");
+  }
 });

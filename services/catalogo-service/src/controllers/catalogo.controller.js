@@ -76,6 +76,11 @@ async function obtenerMallaPorCarrera(req, res) {
         p.id_plan,
         p.nombre AS plan,
         m.semestre,
+        m.orden,
+        m.requisitos_estado,
+        m.requisito_nivel,
+        m.espacio_electivo,
+        m.fuente,
         a.id_asignatura,
         a.codigo,
         a.nombre AS asignatura,
@@ -90,13 +95,14 @@ async function obtenerMallaPorCarrera(req, res) {
         ON a.id_asignatura = m.id_asignatura
       WHERE c.id_carrera = $1
         AND p.id_plan = $2
-      ORDER BY m.semestre, a.nombre
+      ORDER BY m.semestre, m.orden, a.nombre
       `,
       [idCarrera,elegido.id_plan]
     );
 
     const requisitos = await pool.query('SELECT * FROM prerrequisito WHERE id_asignatura IN (SELECT id_asignatura FROM malla_curricular WHERE id_plan=$1)',[elegido.id_plan]);
-    res.json({malla:resultado.rows,planes:planes.rows,plan:elegido,prerrequisitos:requisitos.rows});
+    const opciones = await pool.query('SELECT e.*,a.nombre,a.codigo,a.creditos FROM electivo_opcion e JOIN asignatura a USING(id_asignatura) WHERE e.id_plan=$1',[elegido.id_plan]);
+    res.json({malla:resultado.rows,planes:planes.rows,plan:elegido,prerrequisitos:requisitos.rows,electivos:opciones.rows});
   } catch (error) {
     console.error(error);
 

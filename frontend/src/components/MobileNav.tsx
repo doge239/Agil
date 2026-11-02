@@ -1,12 +1,14 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { cn } from '../utils/cn'
 import { getNavItems } from './navItems'
+import { PortalIcon } from './PortalIcon'
+import { iconoRuta } from '../utils/portalIcons'
 
 export function MobileNav() {
   const items=getNavItems(useLocation().pathname)
   return (
-    <div className="border-b border-border bg-surface md:hidden">
-      <nav className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-2">
+    <div className="portal-mobile-nav">
+      <nav aria-label="Navegación móvil" className="flex gap-2 overflow-x-auto px-4 py-2">
         {items.map((item) => (
           <NavLink
             key={item.to}
@@ -14,12 +16,12 @@ export function MobileNav() {
             end={['/','/docente','/unidad'].includes(item.to)}
             className={({ isActive }) =>
               cn(
-                'whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                isActive ? 'bg-primary text-primary-fg' : 'text-muted hover:bg-background',
+                'portal-nav-link whitespace-nowrap',
+                isActive ? 'is-active' : '',
               )
             }
           >
-            {item.label}
+            <PortalIcon name={iconoRuta(item.to)} />{item.label}
           </NavLink>
         ))}
       </nav>

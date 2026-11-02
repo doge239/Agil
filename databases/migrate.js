@@ -1,13 +1,13 @@
-// Ejecutar desde la raíz: node databases/migrate.js usuarios|academico
+// Ejecutar desde la raíz: node databases/migrate.js usuarios|academico|catalogo
 // Usa las dependencias pg ya instaladas del servicio seleccionado.
 const fs = require('node:fs');
 const path = require('node:path');
 async function main() {
   const dominio=process.argv[2];
-  if(!['usuarios','academico'].includes(dominio)) throw new Error('Uso: node databases/migrate.js usuarios|academico');
+  if(!['usuarios','academico','catalogo'].includes(dominio)) throw new Error('Uso: node databases/migrate.js usuarios|academico|catalogo');
   require(path.resolve(__dirname,`../services/${dominio}-service/node_modules/dotenv`)).config({path:path.resolve(__dirname,`../services/${dominio}-service/.env`),quiet:true});
   const {Client}=require(path.resolve(__dirname,`../services/${dominio}-service/node_modules/pg`));
-  const db=new Client({host:process.env.DB_HOST||'localhost',port:Number(process.env.DB_PORT||(dominio==='usuarios'?5434:5436)),database:process.env.DB_NAME||`${dominio}_db`,user:process.env.DB_USER||'postgres',password:process.env.DB_PASSWORD});
+  const db=new Client({host:process.env.DB_HOST||'localhost',port:Number(process.env.DB_PORT||({usuarios:5434,catalogo:5435,academico:5436}[dominio])),database:process.env.DB_NAME||`${dominio}_db`,user:process.env.DB_USER||'postgres',password:process.env.DB_PASSWORD});
   await db.connect();
   try {
     await db.query('SELECT pg_advisory_lock(17002,1)');

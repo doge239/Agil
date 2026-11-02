@@ -27,9 +27,10 @@ export function Button({
   return (
     <button
       {...props}
+      aria-busy={cargando || undefined}
       disabled={disabled || cargando}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+        `glass-button glass-button-${variante} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium`,
         'disabled:cursor-not-allowed disabled:opacity-60',
         estilos[variante],
         className,

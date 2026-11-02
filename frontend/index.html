@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon-ucn.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        let tema;
+        try { tema = localStorage.getItem('banner_theme'); } catch {}
+        document.documentElement.dataset.theme = tema === 'dark' || tema === 'light'
+          ? tema : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      })();
+    </script>
     <title>Banner UCN</title>
   </head>
   <body>

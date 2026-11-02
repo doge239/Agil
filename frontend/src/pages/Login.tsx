@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext'
 import { getErrorMessage } from '../utils/errors'
 import { LogoUcn } from '../components/LogoUcn'
 import { FullScreenLoader } from '../components/FullScreenLoader'
+import { PortalIcon } from '../components/PortalIcon'
+import { ThemeToggle } from '../components/ThemeToggle'
 
 export function Login() {
   const { login, autenticado, inicializando } = useAuth()
@@ -40,20 +42,21 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-transparent px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-3">
-          <LogoUcn className="h-14 w-14" />
-          <div className="rounded-lg bg-surface px-4 py-2 text-center">
-            <h1 className="text-xl font-bold text-text">Banner UCN</h1>
-            <p className="text-sm text-muted">Portal académico UCN</p>
-          </div>
-        </div>
-
+    <div className="login-page">
+      <ThemeToggle />
+      <section className="login-story">
+        <div className="login-story-brand"><LogoUcn /><div><p>Banner UCN</p><small>Universidad Católica del Norte</small></div></div>
+        <span className="page-eyebrow">TU ESPACIO ACADÉMICO</span>
+        <h2>Tu universidad.<br />Siempre contigo.</h2>
+        <p>Un lugar para organizar tu semestre, conocer tu avance y dar el siguiente paso en tu carrera.</p>
+        <div className="login-story-note">UNIVERSIDAD CATÓLICA DEL NORTE · PORTAL ACADÉMICO</div>
+      </section>
+      <div>
         <form
           onSubmit={onSubmit}
-          className="flex flex-col gap-4 rounded-2xl border border-border bg-surface p-6 shadow-sm"
+          className="login-form"
         >
+          <div className="login-form-header"><span className="page-eyebrow">BIENVENIDO A BANNER UCN</span><h1>Inicia tu sesión</h1><p>Ingresa con tu cuenta institucional para continuar.</p></div>
           <Input
             label="Correo institucional"
             type="email"
@@ -82,8 +85,9 @@ export function Login() {
           ) : null}
 
           <Button type="submit" cargando={cargando} className="w-full">
-            Ingresar
+            Ingresar <PortalIcon name="arrow" />
           </Button>
+          <p className="login-security"><PortalIcon name="shield" />Acceso personal a tu información académica</p>
         </form>
       </div>
     </div>

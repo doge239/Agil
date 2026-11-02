@@ -6,13 +6,15 @@ import { PeriodoProvider } from '../context/PeriodoContext'
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="portal-shell min-h-screen">
+      <a className="portal-skip-link" href="#contenido-principal">Saltar al contenido</a>
       <Navbar />
       <MobileNav />
-      <div className="mx-auto flex max-w-6xl gap-6 px-4 py-6">
+      <div className="portal-stage">
         <Sidebar />
-        <main className="min-w-0 flex-1">
+        <main id="contenido-principal" className="portal-main min-w-0 flex-1" tabIndex={-1}>
           <PeriodoProvider><Outlet /></PeriodoProvider>
+          <footer className="portal-footer"><span>Banner UCN</span><span>Tu espacio académico · Universidad Católica del Norte</span></footer>
         </main>
       </div>
     </div>

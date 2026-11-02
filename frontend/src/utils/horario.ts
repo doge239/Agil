@@ -23,7 +23,7 @@ export function normalizarDia(valor: string): string {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
-function aMinutos(hora: string): number {
+export function aMinutos(hora: string): number {
   const [horas, minutos] = hora.slice(0, 5).split(':').map(Number)
   return horas * 60 + minutos
 }
@@ -31,21 +31,14 @@ function aMinutos(hora: string): number {
 export function bloqueParaHorario(horaInicio: string, horaFin: string): string {
   const inicio = aMinutos(horaInicio)
   const fin = aMinutos(horaFin)
-  let mejorLetra = BLOQUES[0].letra
-  let mejorDistancia = Infinity
+  // No redondear una clase a otro bloque: se deben conservar sus horas reales.
+  return BLOQUES.find(b => inicio >= aMinutos(b.hora_inicio) && fin <= aMinutos(b.hora_fin))?.letra ?? 'ESPECIAL'
+}
 
-  for (const bloque of BLOQUES) {
-    const distancia =
-      Math.abs(inicio - aMinutos(bloque.hora_inicio)) +
-      Math.abs(fin - aMinutos(bloque.hora_fin))
-
-    if (distancia < mejorDistancia) {
-      mejorDistancia = distancia
-      mejorLetra = bloque.letra
-    }
-  }
-
-  return mejorLetra
+export function seSuperponen(a: {dia_semana:string;hora_inicio:string;hora_fin:string}, b: {dia_semana:string;hora_inicio:string;hora_fin:string}): boolean {
+  return normalizarDia(a.dia_semana) === normalizarDia(b.dia_semana)
+    && aMinutos(a.hora_inicio) < aMinutos(b.hora_fin)
+    && aMinutos(b.hora_inicio) < aMinutos(a.hora_fin)
 }
 
 export const COLORES_ASIGNATURA: string[] = [
@@ -61,10 +54,12 @@ export const COLORES_ASIGNATURA: string[] = [
 
 export function asignarColores(ids: number[]): Map<number, string> {
   const colores = new Map<number, string>()
-  for (const id of ids) {
-    if (!colores.has(id)) {
-      colores.set(id, COLORES_ASIGNATURA[colores.size % COLORES_ASIGNATURA.length])
-    }
+  const usados = new Set<number>()
+  for (const id of [...new Set(ids)].sort((a, b) => a - b)) {
+    let indice = (id - 1) % COLORES_ASIGNATURA.length
+    for (let intento = 0; usados.has(indice) && intento < COLORES_ASIGNATURA.length; intento++) indice = (indice + 1) % COLORES_ASIGNATURA.length
+    usados.add(indice)
+    colores.set(id, COLORES_ASIGNATURA[indice])
   }
   return colores
 }

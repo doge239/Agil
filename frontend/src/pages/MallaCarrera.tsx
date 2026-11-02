@@ -78,7 +78,7 @@ export function MallaCarrera() {
                     <div>
                       <p className="text-sm font-medium text-text">{item.asignatura}</p>
                       <p className="text-xs text-muted">
-                        {item.codigo} · {item.creditos} créditos
+                        {item.codigo ?? 'Código por confirmar'} · {item.creditos === null ? 'Créditos por confirmar' : `${item.creditos} créditos`}
                       </p>
                     </div>
                     <Badge estado={item.obligatoria ? 'OBLIGATORIA' : 'ELECTIVA'} />

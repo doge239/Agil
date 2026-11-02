@@ -1,0 +1,41 @@
+.horario-semanal { background: #f7f9fb; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px #0001; }
+.horario-escenario { background: #eaf3f5; color: #175367; padding: 10px 12px; border-radius: 6px; font-size: 12px; line-height: 1.6; margin-bottom: 14px; }
+.horario-herramientas { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 16px 0; color: var(--text-secondary); font-size: 13px; }
+.horario-herramientas p > span { margin: 0 10px; color: var(--text-subtle); }
+.horario-herramientas label { display: flex; align-items: center; gap: 10px; }
+.horario-herramientas select { border: 1px solid #cbd5e1; background: #fff; padding: 8px 12px; border-radius: 7px; }
+.horario-scroll { overflow: auto; border-radius: 8px; border: 1px solid #dde5eb; box-shadow: 0 2px 5px #0001; background: #f8fafb; scrollbar-color: #8cabb5 #e6edf0; }
+.horario-tabla { border-collapse: separate; border-spacing: 0; table-layout: fixed; min-width: 1100px; width: 100%; }
+.horario-col-bloque { width: 130px; }
+.horario-tabla thead th { background: #175f71; color: #fff; text-transform: uppercase; font-size: 12px; padding: 14px 8px; text-align: center; position: sticky; top: 0; z-index: 2; }
+.horario-tabla thead small { display: block; font-size: 9px; margin-top: 2px; }
+.horario-tabla thead .horario-hoy { color: #ffd18d; }
+.horario-tabla tbody th { background: #f8fafb; color: var(--text-secondary); text-align: center; vertical-align: middle; padding: 18px 8px; font-weight: 400; position: sticky; left: 0; z-index: 1; border-top: 1px solid #e2e8f0; }
+.horario-tabla tbody th strong { display: block; font-size: 15px; margin-bottom: 4px; font-weight: 600; }
+.horario-tabla tbody th span { display: block; font-size: 11px; }
+.horario-tabla td { border-top: 1px solid #e2e8f0; padding: 12px 6px; vertical-align: middle; }
+.horario-tabla td.horario-col-hoy { background: #eff5f7; }
+.horario-tabla tbody th.horario-bloque-especial { color: #946106; background: #fffbef; }
+.horario-celda { display: flex; flex-direction: column; gap: 12px; min-height: 72px; justify-content: center; }
+.horario-clase { position: relative; border-width: 1px; border-style: solid; border-radius: 7px; padding: 9px 10px 7px; box-shadow: 0 2px 5px #17303e14; }
+.horario-seccion { position: absolute; top: -6px; left: -6px; border-radius: 50%; display: grid; place-items: center; min-width: 25px; height: 25px; background: #334155; color: #fff; font-size: 10px; padding: 0 4px; box-shadow: 0 2px 4px #0002; }
+.horario-codigo { display: block; text-align: right; font-size: 10px; margin-bottom: 6px; overflow-wrap: anywhere; }
+.horario-clase h2 { font-size: 12px; font-weight: 650; text-align: center; line-height: 1.4; padding: 0 4px; overflow-wrap: anywhere; }
+.horario-horas { text-align: center; font-size: 11px; margin-top: 6px; }
+.horario-clase-pie { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; font-size: 10px; margin-top: 8px; }
+.horario-cruce { outline: 2px solid #dc2626; outline-offset: 1px; }
+.horario-cruce-texto { color: #b91c1c; font-size: 10px; font-weight: 700; margin-top: 7px; text-align: center; }
+.horario-alerta { border: 1px solid #fecaca; background: #fff1f2; color: #a61b2b; font-size: 12px; padding: 10px 12px; border-radius: 6px; margin-bottom: 14px; }
+.horario-leyenda { display: flex; flex-wrap: wrap; gap: 10px 20px; padding: 14px 0 4px; font-size: 12px; color: var(--text-secondary); }
+.horario-leyenda span { display: flex; align-items: center; gap: 6px; }
+.horario-leyenda i { display: inline-block; width: 12px; height: 12px; border-width: 1px; border-radius: 3px; flex-shrink: 0; }
+.horario-aclaracion { color: var(--text-secondary); font-size: 12px; margin-top: 12px; line-height: 1.6; }
+.horario-un-dia { min-width: 0; }
+.horario-scroll:focus-visible, .horario-herramientas select:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+@media (max-width: 600px) { .horario-semanal { padding: 12px; }.horario-col-bloque { width: 105px; }.horario-herramientas label { width: 100%; justify-content: space-between; } }
+
+.horario-semanal { background: transparent; padding: 0; box-shadow: none; border-radius: 0; }
+.horario-scroll { background: #f8fcff61; border-color: #ffffffa6; border-radius: 18px; box-shadow: var(--glass-shadow); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+.horario-tabla thead th { background: linear-gradient(135deg, #08618bea, #064a71ed); font-size: 10px; letter-spacing: .05em; border-bottom: 1px solid #ffffff82; padding: 13px 7px; }.horario-tabla tbody th { background: #f1f7fbeb; font-size: 11px; color: var(--text-secondary); border-top-color: #ffffffb3; }.horario-tabla td { border-top-color: #ffffffb3; padding: 11px 7px; }.horario-tabla td.horario-col-hoy { background: #d6ebf240; }
+.horario-clase { border-color: #ffffffbf; border-radius: 13px; box-shadow: inset 0 1px 0 #fff9, 0 3px 8px #0d3a5610; }.horario-clase h2 { font-size: 11px; font-weight: 600; }.horario-seccion { background: linear-gradient(130deg, #4b6b81, #254961); border: 1px solid #ffffffad; box-shadow: 0 3px 6px #0c3b5c1c; }.horario-codigo { font-size: 9px; }.horario-horas { font-size: 10px; }
+.horario-escenario { color: var(--text-subtle); background: #edf6fa8c; border: 1px solid #ffffff87; border-radius: 11px; font-size: 10px; }.horario-herramientas { font-size: 11px; color: var(--text-secondary); }.horario-herramientas select { border-radius: 11px; font-size: 11px; }.horario-leyenda { font-size: 10px; gap: 10px 17px; }.horario-aclaracion { font-size: 10px; color: var(--text-subtle); }

@@ -2,6 +2,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Button } from './Button'
 import { LogoUcn } from './LogoUcn'
+import { PortalIcon } from './PortalIcon'
+import { ThemeToggle } from './ThemeToggle'
 
 export function Navbar() {
   const { usuario, logout } = useAuth()
@@ -16,23 +18,25 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-surface">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <div className="flex items-center gap-3">
+    <header className="portal-topbar">
+      <div className="portal-topbar-inner">
+        <Link to={unidad?'/unidad':docente?'/docente':'/'} className="portal-brand" aria-label="Banner UCN, inicio">
           <LogoUcn className="h-9 w-9" />
-          <div className="leading-tight">
-            <p className="text-sm font-bold text-text">Banner UCN</p>
-            <p className="text-xs text-muted">{unidad?'Administración de Unidad':docente?'Portal docente':'Portal del estudiante'}</p>
+          <div>
+            <p className="portal-brand-name">Banner <span>UCN</span></p>
+            <p className="portal-brand-caption">Universidad Católica del Norte</p>
           </div>
-        </div>
+        </Link>
+        <span className="portal-context">{unidad?'Administración de Unidad':docente?'Portal docente':'Portal del estudiante'}</span>
 
         <div className="flex items-center gap-3">
           {portales.length>1&&<nav aria-label="Cambiar perfil" className="flex flex-wrap gap-2">{portales.map(p=><Link key={p.rol} className="text-sm underline" to={p.ruta}>{p.nombre}</Link>)}</nav>}
           {usuario ? (
-            <span className="hidden text-sm text-muted sm:inline">{usuario.correo}</span>
+            <span className="portal-account"><span className="portal-avatar" aria-hidden="true">{usuario.correo.slice(0,1).toUpperCase()}</span><span>{usuario.correo}</span></span>
           ) : null}
+          <ThemeToggle />
           <Button variante="secondary" onClick={cerrarSesion}>
-            Salir
+            <PortalIcon name="logout" /> Salir
           </Button>
         </div>
       </div>

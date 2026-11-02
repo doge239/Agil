@@ -1,6 +1,7 @@
 const pool=require('../config/database');
 const {exigir,hayChoque}=require('../domain/estudiante');
-async function resultados(db,id){return (await db.query('SELECT c.id_asignatura,r.nota,r.nota_minima FROM resultado_final r JOIN inscripcion i USING(id_inscripcion) JOIN curso c USING(id_curso) WHERE i.id_estudiante=$1',[id])).rows;}
+const {calcularAvance}=require('./avance');
+async function resultados(db,id){return (await db.query("SELECT c.id_asignatura,r.nota,r.nota_minima FROM resultado_final r JOIN inscripcion i USING(id_inscripcion) JOIN curso c USING(id_curso) WHERE i.id_estudiante=$1 AND i.estado IN ('ACTIVA','FINALIZADA')",[id])).rows;}
 async function auditar(db,req,accion,detalle){await db.query('INSERT INTO auditoria_academica(id_usuario,accion,detalle) VALUES($1,$2,$3)',[req.usuario.id_usuario,accion,JSON.stringify(detalle)]);}
 async function inscribirCurso({req,p,m,cat,id,tipo='ESTUDIANTE',motivo=null,autorizar=()=>{}}){
  const db=await pool.connect();
@@ -11,14 +12,18 @@ async function inscribirCurso({req,p,m,cat,id,tipo='ESTUDIANTE',motivo=null,auto
     exigir(r.rowCount,404,'Curso no encontrado'); const c=r.rows[0];
     autorizar(c);
     exigir(c.estado==='ACTIVO'&&c.estado_periodo==='ACTIVO'&&c.inscripcion_abierta,409,'La inscripción no está abierta para este curso');
-    exigir(m.malla.some(a=>a.id_asignatura===c.id_asignatura)&&cat.some(a=>a.id_asignatura===c.id_asignatura&&a.estado==='ACTIVA'),403,'Asignatura no disponible en tu plan');
+    const elecciones=(await db.query('SELECT * FROM eleccion_electivo WHERE id_estudiante=$1 AND id_plan=$2',[p.id_estudiante,p.id_plan])).rows;
+    const finales=await resultados(db,p.id_estudiante);
+    const avance=calcularAvance(m,finales,[],elecciones);
+    const asignatura=avance.asignaturas.find(a=>(a.elegida?.id_asignatura??a.id_asignatura)===c.id_asignatura);
+    exigir(asignatura&&cat.some(a=>a.id_asignatura===c.id_asignatura&&a.estado==='ACTIVA'),403,'Asignatura no disponible en tu plan');
     const restricciones=await db.query('SELECT 1 FROM restriccion WHERE id_estudiante=$1 AND activa AND (id_unidad IS NULL OR id_unidad=$2)',[p.id_estudiante,c.id_unidad]);
     exigir(!restricciones.rowCount,409,'Tienes restricciones activas. Puedes solicitar su levantamiento.');
     const previas=await db.query(`SELECT cu.id_asignatura,cu.id_periodo FROM inscripcion i JOIN curso cu USING(id_curso) WHERE i.id_estudiante=$1 AND i.estado='ACTIVA'`,[p.id_estudiante]);
     exigir(!previas.rows.some(i=>i.id_periodo===c.id_periodo&&i.id_asignatura===c.id_asignatura),409,'Ya estás inscrito en esta asignatura durante el período');
-    const finales=await resultados(db,p.id_estudiante); const aprobadas=new Set(finales.filter(r=>Number(r.nota)>=Number(r.nota_minima)).map(r=>r.id_asignatura));
-    exigir(!aprobadas.has(c.id_asignatura),409,'La asignatura ya está aprobada');
-    exigir(m.prerrequisitos.filter(a=>a.id_asignatura===c.id_asignatura).every(a=>aprobadas.has(a.id_asignatura_requisito)),409,'No cumples los prerrequisitos');
+    exigir(asignatura.estado!=='APROBADA',409,'La asignatura ya está aprobada');
+    exigir(asignatura.disponibilidad!=='POR_CONFIRMAR',409,'Los requisitos de esta asignatura están por confirmar');
+    exigir(asignatura.disponibilidad==='DISPONIBLE',409,'No cumples los prerrequisitos');
     const horarios=await db.query('SELECT * FROM horario WHERE id_curso=$1',[id]);
     const actuales=await db.query(`SELECT h.* FROM horario h JOIN curso c USING(id_curso) JOIN inscripcion i USING(id_curso) WHERE i.id_estudiante=$1 AND i.estado='ACTIVA' AND c.id_periodo=$2`,[p.id_estudiante,c.id_periodo]);
     exigir(!horarios.rows.some(a=>actuales.rows.some(b=>hayChoque(a,b))),409,'Existe un choque de horario');

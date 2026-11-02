@@ -1,7 +1,8 @@
 const pool = require('../config/database');
 const axios = require('axios');
 const { randomUUID } = require('node:crypto');
-const { exigir, idPositivo, texto, hayChoque, respuestasValidas, progreso } = require('../domain/estudiante');
+const { exigir, idPositivo, texto, hayChoque, respuestasValidas } = require('../domain/estudiante');
+const { calcularAvance } = require('../domain/avance');
 const { crearCertificado, crearAsignacionFamiliar } = require('../domain/pdf');
 async function remoto(req, servicio, ruta) {
   try { return (await axios.get(`${process.env[servicio]}${ruta}`, { headers:{Authorization:req.headers.authorization},timeout:8000 })).data; }
@@ -22,11 +23,15 @@ async function plan(req,p) {
   exigir(m.malla.length,409,'El plan asignado no tiene asignaturas'); return m;
 }
 async function catalogo(req) { return (await remoto(req,'CATALOGO_SERVICE_URL','/catalogo/asignaturas')).asignaturas; }
+async function demostracion(p) {
+  const r=await pool.query("SELECT detalle->>'descripcion' AS descripcion FROM auditoria_academica WHERE accion='CONFIGURAR_ESCENARIO_ITI' AND id_usuario=$1 AND detalle->>'id_estudiante'=$2::text ORDER BY id_auditoria DESC LIMIT 1",[p.id_usuario,String(p.id_estudiante)]);
+  return {demostracion:p.numero_matricula==='DEMO-ITI-2026'||r.rows.length>0,descripcion_escenario:r.rows[0]?.descripcion??null};
+}
 async function enriquecer(req,rows) {
   const mapa=new Map((await catalogo(req)).map(a=>[a.id_asignatura,a]));
   return rows.map(r=>({...r,codigo:mapa.get(r.id_asignatura)?.codigo??null,nombre:mapa.get(r.id_asignatura)?.nombre??null,creditos:mapa.get(r.id_asignatura)?.creditos??null}));
 }
-async function resultados(db,id) { return (await db.query(`SELECT c.id_asignatura,c.id_curso,r.nota,r.nota_minima FROM resultado_final r JOIN inscripcion i USING(id_inscripcion) JOIN curso c USING(id_curso) WHERE i.id_estudiante=$1`,[id])).rows; }
+async function resultados(db,id) { return (await db.query(`SELECT c.id_asignatura,c.id_curso,r.nota,r.nota_minima FROM resultado_final r JOIN inscripcion i USING(id_inscripcion) JOIN curso c USING(id_curso) JOIN periodo_academico pa USING(id_periodo) WHERE i.id_estudiante=$1 AND i.estado IN ('ACTIVA','FINALIZADA') ORDER BY pa.anio,pa.semestre,r.fecha_registro,r.id_resultado`,[id])).rows; }
 async function transaccion(fn) {
   const db=await pool.connect();
   try { await db.query('BEGIN'); const r=await fn(db); await db.query('COMMIT'); return r; }
@@ -45,7 +50,8 @@ exports.obtenerAsignaturas=estudiante(async(req,res,p)=> {
   res.json({asignaturas:await enriquecer(req,r.rows)});
 });
 exports.obtenerHorario=estudiante(async(req,res,p)=> {
-  const per=await periodo(req); const r=await pool.query(`SELECT c.id_curso,c.id_asignatura,c.seccion,h.* FROM inscripcion i JOIN curso c USING(id_curso) JOIN horario h USING(id_curso) WHERE i.id_estudiante=$1 AND i.estado IN ('ACTIVA','FINALIZADA') AND c.id_periodo=$2 ORDER BY h.dia_semana,h.hora_inicio`,[p.id_estudiante,per.id_periodo]); res.json({horario:r.rows});
+  const per=await periodo(req); const r=await pool.query(`SELECT c.id_curso,c.id_asignatura,c.seccion,h.* FROM inscripcion i JOIN curso c USING(id_curso) JOIN horario h USING(id_curso) WHERE i.id_estudiante=$1 AND i.estado IN ('ACTIVA','FINALIZADA') AND c.id_periodo=$2 ORDER BY h.dia_semana,h.hora_inicio,h.id_horario`,[p.id_estudiante,per.id_periodo]);
+  res.set('Cache-Control','no-store').json({horario:await enriquecer(req,r.rows),...await demostracion(p)});
 });
 exports.obtenerNotas=estudiante(async(req,res,p)=> {
   const per=await periodo(req);
@@ -79,7 +85,9 @@ exports.obtenerAvance=estudiante(async(req,res,p)=> {
   const m=await plan(req,p); const finales=await resultados(pool,p.id_estudiante);
   const actuales=await pool.query(`SELECT c.id_asignatura FROM inscripcion i JOIN curso c USING(id_curso) JOIN periodo_academico pa USING(id_periodo)
     WHERE i.id_estudiante=$1 AND i.estado='ACTIVA' AND pa.estado='ACTIVO' AND CURRENT_DATE BETWEEN pa.fecha_inicio AND pa.fecha_fin AND NOT EXISTS(SELECT 1 FROM resultado_final r WHERE r.id_inscripcion=i.id_inscripcion)`,[p.id_estudiante]);
-  res.json({plan:m.plan,...progreso(m.malla,finales,actuales.rows)});
+  const elecciones=await pool.query('SELECT * FROM eleccion_electivo WHERE id_estudiante=$1 AND id_plan=$2',[p.id_estudiante,p.id_plan]);
+  const historial=await pool.query("SELECT count(*)::int AS total FROM inscripcion WHERE id_estudiante=$1 AND estado IN ('ACTIVA','FINALIZADA')",[p.id_estudiante]);
+  res.set('Cache-Control','no-store').json({plan:m.plan,...await demostracion(p),sin_historial:historial.rows[0].total===0,...calcularAvance(m,finales,actuales.rows,elecciones.rows)});
 });
 exports.obtenerRestricciones=estudiante(async(req,res,p)=>res.json({restricciones:(await pool.query('SELECT * FROM restriccion WHERE id_estudiante=$1 ORDER BY activa DESC,fecha_creacion DESC',[p.id_estudiante])).rows}));
 exports.obtenerSolicitudes=estudiante(async(req,res,p)=>res.json({solicitudes:(await pool.query(`SELECT s.*,r.tipo FROM solicitud_levantamiento s JOIN restriccion r USING(id_restriccion) WHERE r.id_estudiante=$1 ORDER BY s.fecha_creacion DESC`,[p.id_estudiante])).rows}));

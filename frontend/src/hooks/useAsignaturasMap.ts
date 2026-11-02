@@ -14,7 +14,7 @@ export function useAsignaturasMap() {
     const mapa = new Map<number, AsignaturaInfo>()
     data?.asignaturas.forEach((asignatura) => {
       mapa.set(asignatura.id_asignatura, {
-        codigo: asignatura.codigo,
+        codigo: asignatura.codigo ?? 'Código por confirmar',
         nombre: asignatura.nombre,
       })
     })

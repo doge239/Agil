@@ -1,0 +1,694 @@
+[
+  {
+    "ref": "0",
+    "nombre": "Cálculo I",
+    "codigo": "DCCB-00141",
+    "creditos": 6,
+    "semestre": 1,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20I/01%20S1%20-%20C%C3%A1lculo%20I.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "2",
+    "nombre": "Álgebra I",
+    "codigo": "DCCB-00142",
+    "creditos": 6,
+    "semestre": 1,
+    "orden": 2,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20I/03%20S1%20-%20%C3%81lgebra%20I.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "1",
+    "nombre": "Física I",
+    "codigo": "DCCB-00144",
+    "creditos": 6,
+    "semestre": 1,
+    "orden": 3,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20I/02%20S1%20-%20F%C3%ADsica%20I.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "3",
+    "nombre": "Identidad, Universidad, Equidad y Género",
+    "codigo": "DCTE-00000",
+    "creditos": 1,
+    "semestre": 1,
+    "orden": 4,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20I/04%20S1%20-%20Identidad%2C%20Universidad%2C%20Equidad%20y%20G%C3%A9nero.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "6",
+    "nombre": "Proyecto Introducción a la Ingeniería",
+    "codigo": "ECIN-00115",
+    "creditos": 5,
+    "semestre": 1,
+    "orden": 5,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20I/07%20S1%20-%20Proyecto%20Introducci%C3%B3n%20a%20la%20Ingenier%C3%ADa.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "4",
+    "nombre": "Inglés 1",
+    "codigo": "SSED-01184",
+    "creditos": 4,
+    "semestre": 1,
+    "orden": 6,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20I/05%20S1%20-%20Ingl%C3%A9s.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "5",
+    "nombre": "Formación General Electiva",
+    "codigo": "UNFE-10001",
+    "creditos": 2,
+    "semestre": 1,
+    "orden": 7,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20I/06%20S1%20-%20Formaci%C3%B3n%20General%20Electiva.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "8",
+    "nombre": "Física II",
+    "codigo": "DCCB-00244",
+    "creditos": 6,
+    "semestre": 2,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20II/09%20S2%20-%20F%C3%ADsica%20II.pdf",
+    "requisitos": [
+      "1"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "7",
+    "nombre": "Cálculo II",
+    "codigo": "DCCB-00245",
+    "creditos": 6,
+    "semestre": 2,
+    "orden": 2,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20II/08%20S2%20-%20C%C3%A1lculo%20II.pdf",
+    "requisitos": [
+      "0"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "9",
+    "nombre": "Álgebra II",
+    "codigo": "DCCB-00246",
+    "creditos": 6,
+    "semestre": 2,
+    "orden": 3,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20II/10%20S2%20-%20%C3%81lgebra%20II.pdf",
+    "requisitos": [
+      "2"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "10",
+    "nombre": "Programación",
+    "codigo": "ECIN-00261",
+    "creditos": 6,
+    "semestre": 2,
+    "orden": 4,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20II/11%20S2%20-%20Programaci%C3%B3n.pdf",
+    "requisitos": [
+      "2",
+      "6"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "11",
+    "nombre": "Comunicación Efectiva I",
+    "codigo": "SSED-00102",
+    "creditos": 2,
+    "semestre": 2,
+    "orden": 5,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20II/12%20S2%20-%20Comunicaci%C3%B3n%20Efectiva%20I.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "12",
+    "nombre": "Inglés 2",
+    "codigo": "SSED-002184",
+    "creditos": 4,
+    "semestre": 2,
+    "orden": 6,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20II/13%20S2%20-%20Ingl%C3%A9s%20II.pdf",
+    "requisitos": [
+      "4"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "14",
+    "nombre": "Química General",
+    "codigo": "DCCB-00341",
+    "creditos": 6,
+    "semestre": 3,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20III/15%20S3%20-%20Qu%C3%ADmica%20General.pdf",
+    "requisitos": [],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "18",
+    "nombre": "Proyecto Programación Avanzada",
+    "codigo": "ECIN-00360",
+    "creditos": 6,
+    "semestre": 3,
+    "orden": 2,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20III/19%20S3%20-%20Proyecto%20Programaci%C3%B3n%20Avanzada.pdf",
+    "requisitos": [
+      "10",
+      "6"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "16",
+    "nombre": "Programación Orientada a Objetos",
+    "codigo": "ECIN-00361",
+    "creditos": 5,
+    "semestre": 3,
+    "orden": 3,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20III/17%20S3%20-%20Programaci%C3%B3n%20Orientada%20a%20Objeto.pdf",
+    "requisitos": [
+      "10"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "13",
+    "nombre": "Estadística",
+    "codigo": "ECIN-00362",
+    "creditos": 6,
+    "semestre": 3,
+    "orden": 4,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20III/14%20S3%20-%20Estad%C3%ADstica.pdf",
+    "requisitos": [
+      "7"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "15",
+    "nombre": "Electrotecnia",
+    "codigo": "ECIN-00415",
+    "creditos": 5,
+    "semestre": 3,
+    "orden": 5,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20III/16%20S3%20-%20Electrotecnia.pdf",
+    "requisitos": [
+      "8"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "17",
+    "nombre": "Diálogo, Fe y Cultura",
+    "codigo": "DCTE-00002",
+    "creditos": 2,
+    "semestre": 3,
+    "orden": 6,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20III/18%20S3%20-%20Di%C3%A1logo%2C%20Fe%20y%20Cultura.pdf",
+    "requisitos": [
+      "3"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "22",
+    "nombre": "Estructuras de Datos",
+    "codigo": "ECIN-00416",
+    "creditos": 5,
+    "semestre": 4,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20IV/23%20S4%20-%20Estructuras%20de%20Datos.pdf",
+    "requisitos": [
+      "16"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "25",
+    "nombre": "Proyecto Sistemas Digitales",
+    "codigo": "ECIN-00460",
+    "creditos": 6,
+    "semestre": 4,
+    "orden": 2,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20IV/26%20S4%20-%20Proyecto%20Sistemas%20Digitales.pdf",
+    "requisitos": [
+      "18",
+      "15"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "20",
+    "nombre": "Ciencia de datos",
+    "codigo": "ECIN-00462",
+    "creditos": 5,
+    "semestre": 4,
+    "orden": 3,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20IV/21%20S4%20-%20Ciencia%20de%20Datos.pdf",
+    "requisitos": [
+      "13"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "21",
+    "nombre": "Arquitectura y Organización de Computadores",
+    "codigo": "ECIN-00464",
+    "creditos": 5,
+    "semestre": 4,
+    "orden": 4,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20IV/22%20S4%20-%20Arquitectura%20y%20Organizaci%C3%B3n%20de%20Computadores.pdf",
+    "requisitos": [
+      "16"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "23",
+    "nombre": "Comunicación Efectiva II",
+    "codigo": "SSED-02020",
+    "creditos": 2,
+    "semestre": 4,
+    "orden": 5,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20IV/24%20S4%20-%20Comunicaci%C3%B3n%20Efectiva%20II.pdf",
+    "requisitos": [
+      "11"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "19",
+    "nombre": "Electivo Profesional 1",
+    "codigo": "UNFP-40001",
+    "creditos": 5,
+    "semestre": 4,
+    "orden": 6,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20IV/20%20S4%20-%20Electivo%20Profesional%201.pdf",
+    "requisitos": [],
+    "requisito_nivel": 3,
+    "requisitos_estado": "POR_CONFIRMAR",
+    "espacio_electivo": true
+  },
+  {
+    "ref": "24",
+    "nombre": "Diálogo, Fe y Ciencia",
+    "codigo": "DCTE-00004",
+    "creditos": 2,
+    "semestre": 4,
+    "orden": 7,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20IV/25%20S4%20-%20Di%C3%A1logo%2C%20Fe%20y%20Ciencia.pdf",
+    "requisitos": [
+      "17"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "31",
+    "nombre": "Proyecto IoT",
+    "codigo": "ECIN-00560",
+    "creditos": 5,
+    "semestre": 5,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20V/32%20S5%20-%20Proyecto%20IoT.pdf",
+    "requisitos": [
+      "25",
+      "22"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "29",
+    "nombre": "Ingeniería de Software",
+    "codigo": "ECIN-00610",
+    "creditos": 5,
+    "semestre": 5,
+    "orden": 2,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20V/30%20S5%20-%20Ingenier%C3%ADa%20de%20Software.pdf",
+    "requisitos": [
+      "22"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "30",
+    "nombre": "Bases de datos",
+    "codigo": "ECIN-00418",
+    "creditos": 5,
+    "semestre": 5,
+    "orden": 3,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20V/31%20S5%20-%20Bases%20de%20Datos.pdf",
+    "requisitos": [
+      "22"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "27",
+    "nombre": "Fundamentos de Ciencias de la Computación",
+    "codigo": "ECIN-00563",
+    "creditos": 5,
+    "semestre": 5,
+    "orden": 4,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20V/28%20S5%20-%20Fundamentos%20de%20Ciencias%20de%20la%20Computaci%C3%B3n.pdf",
+    "requisitos": [
+      "16"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "28",
+    "nombre": "Sistemas Operativos",
+    "codigo": "ECIN-00564",
+    "creditos": 5,
+    "semestre": 5,
+    "orden": 5,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20V/29%20S5%20-%20Sistemas%20Operativos.pdf",
+    "requisitos": [
+      "21"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "26",
+    "nombre": "Electivo Profesional 2",
+    "codigo": "UNFP-50001",
+    "creditos": 5,
+    "semestre": 5,
+    "orden": 6,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20V/27%20S5%20-%20Electivo%20Profesional%202.pdf",
+    "requisitos": [
+      "19"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "POR_CONFIRMAR",
+    "espacio_electivo": true
+  },
+  {
+    "ref": "37",
+    "nombre": "Proyecto Desarrollo Ágil",
+    "codigo": "ECIN-00660",
+    "creditos": 5,
+    "semestre": 6,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VI/38%20S6%20-%20Proyecto%20Desarrollo%20%C3%81gil.pdf",
+    "requisitos": [
+      "31",
+      "27"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "33",
+    "nombre": "Sistemas de Información",
+    "codigo": "ECIN-00661",
+    "creditos": 5,
+    "semestre": 6,
+    "orden": 2,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VI/34%20S6%20-%20Sistemas%20de%20Informaci%C3%B3n.pdf",
+    "requisitos": [
+      "29"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "35",
+    "nombre": "Desarrollo Soluciones Web/Móvil",
+    "codigo": "ECIN-00662",
+    "creditos": 5,
+    "semestre": 6,
+    "orden": 3,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VI/36%20S6%20-%20Desarrollo%20Soluciones%20Web-M%C3%B3vil.pdf",
+    "requisitos": [
+      "29",
+      "30"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "36",
+    "nombre": "Creatividad e Innovación Digital",
+    "codigo": "ECIN-00663",
+    "creditos": 5,
+    "semestre": 6,
+    "orden": 4,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VI/37%20S6%20-%20Creatividad%20e%20Innovaci%C3%B3n%20Digital.pdf",
+    "requisitos": [],
+    "requisito_nivel": 5,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "34",
+    "nombre": "Redes de Computadores I",
+    "codigo": "ECIN-00664",
+    "creditos": 5,
+    "semestre": 6,
+    "orden": 5,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VI/35%20S6%20-%20Redes%20de%20Computadores%20I.pdf",
+    "requisitos": [
+      "28"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "46",
+    "nombre": "Práctica Profesional",
+    "codigo": null,
+    "creditos": null,
+    "semestre": 6,
+    "orden": 6,
+    "fuente": null,
+    "requisitos": [
+      "29",
+      "30"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "POR_CONFIRMAR",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "32",
+    "nombre": "Electivo Profesional 3",
+    "codigo": "UNFP-60001",
+    "creditos": 5,
+    "semestre": 6,
+    "orden": 7,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VI/33%20S6%20-%20Electivo%20Profesional%203.pdf",
+    "requisitos": [
+      "26"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "POR_CONFIRMAR",
+    "espacio_electivo": true
+  },
+  {
+    "ref": "43",
+    "nombre": "Ética y Moral Profesional",
+    "codigo": "DCTE-00005",
+    "creditos": 2,
+    "semestre": 7,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VII/44%20S7%20-%20%C3%89tica%20y%20Moral%20Profesional.pdf",
+    "requisitos": [
+      "24"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "41",
+    "nombre": "Gestión de Proyectos TI",
+    "codigo": "ECIN-00705",
+    "creditos": 5,
+    "semestre": 7,
+    "orden": 2,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VII/42%20S7%20-%20Gesti%C3%B3n%20de%20Proyectos%20TI.pdf",
+    "requisitos": [
+      "33",
+      "35"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "44",
+    "nombre": "Proyecto Desarrollo Ágil Escalado",
+    "codigo": "ECIN-00760",
+    "creditos": 5,
+    "semestre": 7,
+    "orden": 3,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VII/45%20S7%20-%20Proyecto%20Desarrollo%20%C3%81gil%20Escalado.pdf",
+    "requisitos": [
+      "37"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "42",
+    "nombre": "Emprendimiento",
+    "codigo": "ECIN-00761",
+    "creditos": 3,
+    "semestre": 7,
+    "orden": 4,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VII/43%20S7%20-%20Emprendimiento.pdf",
+    "requisitos": [
+      "36"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "39",
+    "nombre": "Ingeniería de Datos y Big Data",
+    "codigo": "ECIN-00762",
+    "creditos": 5,
+    "semestre": 7,
+    "orden": 5,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VII/40%20S7%20-%20Ingenier%C3%ADa%20de%20Datos%20y%20Big%20Data.pdf",
+    "requisitos": [
+      "20",
+      "35"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "40",
+    "nombre": "Redes de Computadores II",
+    "codigo": "ECIN-00764",
+    "creditos": 5,
+    "semestre": 7,
+    "orden": 6,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VII/41%20S7%20-%20Redes%20de%20Computadores%20II.pdf",
+    "requisitos": [
+      "34"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  },
+  {
+    "ref": "38",
+    "nombre": "Electivo Profesional 4",
+    "codigo": "UNFP-70001",
+    "creditos": 5,
+    "semestre": 7,
+    "orden": 7,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VII/39%20S7%20-%20Electivo%20Profesional%204.pdf",
+    "requisitos": [
+      "32"
+    ],
+    "requisito_nivel": null,
+    "requisitos_estado": "POR_CONFIRMAR",
+    "espacio_electivo": true
+  },
+  {
+    "ref": "45",
+    "nombre": "Capstone Project",
+    "codigo": "ECIN-01000",
+    "creditos": 30,
+    "semestre": 8,
+    "orden": 1,
+    "fuente": "https://losvilos.ucn.cl/InstructivosEscuelaIngenieria/E.%20Mallas%20y%20programas%20de%20estudios/Programas/ITI%2B/SEMESTRE%20VIII/46%20S8%20-%20Capstone%20Project.pdf",
+    "requisitos": [
+      "46"
+    ],
+    "requisito_nivel": 7,
+    "requisitos_estado": "CONFIRMADOS",
+    "espacio_electivo": false
+  }
+]

@@ -23,12 +23,6 @@ function respuestasValidas(preguntas, respuestas) {
   return respuestas;
 }
 function progreso(malla, resultados, inscritos) {
-  const aprobadas = new Set(resultados.filter(r => Number(r.nota) >= Number(r.nota_minima)).map(r => r.id_asignatura));
-  const cursadas = new Set(resultados.map(r => r.id_asignatura));
-  const activas = new Set(inscritos.map(r => r.id_asignatura));
-  const asignaturas = malla.map(a => ({ ...a, estado: aprobadas.has(a.id_asignatura) ? 'APROBADA' : activas.has(a.id_asignatura) ? 'EN_CURSO' : cursadas.has(a.id_asignatura) ? 'REPROBADA' : 'PENDIENTE' }));
-  const creditos_totales = asignaturas.reduce((n,a) => n + Number(a.creditos), 0);
-  const creditos_aprobados = asignaturas.filter(a => a.estado === 'APROBADA').reduce((n,a) => n + Number(a.creditos), 0);
-  return { asignaturas, creditos_totales, creditos_aprobados, porcentaje: creditos_totales ? Math.round(100 * creditos_aprobados / creditos_totales) : 0 };
+  return require('./avance').calcularAvance({malla}, resultados, inscritos);
 }
 module.exports = { ErrorAcademico, exigir, idPositivo, texto, hayChoque, respuestasValidas, progreso };
