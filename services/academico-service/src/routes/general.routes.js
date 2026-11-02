@@ -1,0 +1,15 @@
+const router = require('express').Router();
+const c = require('../controllers/general.controller');
+router.get('/resumen',c.resumen);
+router.get('/periodos',c.periodos);
+router.post('/periodos',c.crearPeriodo);
+router.patch('/periodos/:idPeriodo',c.editarPeriodo);
+router.get('/estudiantes',c.estudiantes);
+router.get('/restricciones',c.restricciones);
+router.post('/restricciones',c.crearRestriccion);
+router.patch('/restricciones/:idRestriccion/levantar',c.levantarRestriccion);
+router.get('/auditoria',c.auditoria);
+router.get('/cursos',c.cursos);
+router.post('/cursos',c.crearCurso);
+router.patch('/cursos/:idCurso',c.editarCurso);
+module.exports = router;

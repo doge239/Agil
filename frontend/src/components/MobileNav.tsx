@@ -13,7 +13,7 @@ export function MobileNav() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={['/','/docente','/unidad'].includes(item.to)}
+            end={['/','/docente','/unidad','/general'].includes(item.to)}
             className={({ isActive }) =>
               cn(
                 'portal-nav-link whitespace-nowrap',

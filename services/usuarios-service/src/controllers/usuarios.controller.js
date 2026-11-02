@@ -56,6 +56,19 @@ module.exports = {
   obtenerMiPerfil,
 };
 
+module.exports.buscarGeneral = async (req,res) => {
+  if (!req.usuario?.roles?.includes('ADMIN_GENERAL')) return res.status(403).json({mensaje:'Se requiere Administración General'});
+  const q = req.query.q ?? '', id = req.query.id === undefined ? null : Number(req.query.id);
+  if (typeof q !== 'string' || q.length > 100 || (id !== null && (!Number.isInteger(id) || id <= 0 || id > 2147483647))) return res.status(400).json({mensaje:'Búsqueda inválida'});
+  try {
+    const r = await pool.query(`SELECT e.id_estudiante,e.numero_matricula,e.id_carrera,e.id_plan,p.nombres,p.apellido_paterno,p.apellido_materno,p.correo_institucional
+      FROM estudiante e JOIN persona p USING(id_persona) WHERE ($1::int IS NULL OR e.id_estudiante=$1)
+      AND (p.nombres||' '||p.apellido_paterno||' '||COALESCE(p.apellido_materno,'')||' '||e.numero_matricula||' '||p.correo_institucional) ILIKE $2
+      ORDER BY p.apellido_paterno,p.nombres LIMIT 100`,[id,`%${q}%`]);
+    res.json({estudiantes:r.rows});
+  } catch(e) { console.error(e.message); res.status(503).json({mensaje:'No se pudo consultar estudiantes'}); }
+};
+
 module.exports.buscarUnidad = async(req,res)=> {
   if(!req.usuario?.roles?.includes('ADMIN_UNIDAD'))return res.status(403).json({mensaje:'Se requiere Administración de Unidad'});
   try {

@@ -14,6 +14,7 @@ export function ProtectedRoute({roles=['ESTUDIANTE','DOCENTE']}:{roles?:string[]
   }
 
   if (!usuario?.roles.some(r=>roles.includes(r))) {
+    if(usuario?.roles.includes('ADMIN_GENERAL'))return <Navigate to="/general" replace/>
     if(usuario?.roles.includes('ADMIN_UNIDAD'))return <Navigate to="/unidad" replace/>
     if(usuario?.roles.includes('DOCENTE'))return <Navigate to="/docente" replace/>
     if(usuario?.roles.includes('ESTUDIANTE'))return <Navigate to="/" replace/>

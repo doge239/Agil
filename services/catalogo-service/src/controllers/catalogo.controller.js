@@ -63,7 +63,7 @@ async function obtenerMallaPorCarrera(req, res) {
     const { idCarrera } = req.params;
     const valido = v => /^[1-9]\d*$/.test(String(v)) && Number(v) <= 2147483647;
     if (!valido(idCarrera) || (req.query.plan !== undefined && !valido(req.query.plan))) return res.status(400).json({mensaje:'Carrera o plan inválido'});
-    const planes = await pool.query('SELECT * FROM plan_estudio WHERE id_carrera=$1 ORDER BY anio_inicio DESC,id_plan DESC',[idCarrera]);
+    const planes = await pool.query("SELECT * FROM plan_estudio WHERE id_carrera=$1 AND (estado<>'BORRADOR' OR $2::boolean) ORDER BY anio_inicio DESC,id_plan DESC",[idCarrera,req.usuario?.roles?.includes('ADMIN_GENERAL')||false]);
     if (!planes.rowCount) return res.status(404).json({mensaje:'No hay planes para esta carrera'});
     const elegido = req.query.plan ? planes.rows.find(p=>p.id_plan===Number(req.query.plan)) : planes.rows.find(p=>p.estado==='ACTIVO') || planes.rows[0];
     if (!elegido) return res.status(404).json({mensaje:'El plan no pertenece a esta carrera'});
@@ -100,7 +100,7 @@ async function obtenerMallaPorCarrera(req, res) {
       [idCarrera,elegido.id_plan]
     );
 
-    const requisitos = await pool.query('SELECT * FROM prerrequisito WHERE id_asignatura IN (SELECT id_asignatura FROM malla_curricular WHERE id_plan=$1)',[elegido.id_plan]);
+    const requisitos = await pool.query(elegido.gestionado?'SELECT * FROM prerrequisito_plan WHERE id_plan=$1':'SELECT * FROM prerrequisito WHERE id_asignatura IN (SELECT id_asignatura FROM malla_curricular WHERE id_plan=$1)',[elegido.id_plan]);
     const opciones = await pool.query('SELECT e.*,a.nombre,a.codigo,a.creditos FROM electivo_opcion e JOIN asignatura a USING(id_asignatura) WHERE e.id_plan=$1',[elegido.id_plan]);
     res.json({malla:resultado.rows,planes:planes.rows,plan:elegido,prerrequisitos:requisitos.rows,electivos:opciones.rows});
   } catch (error) {

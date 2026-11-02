@@ -68,6 +68,7 @@ services:
       - ./databases/catalogo/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./databases/migrations/catalogo/001_avance_iti.sql:/docker-entrypoint-initdb.d/zz_001_avance_iti.sql:ro
       - ./databases/migrations/catalogo/002_plan_iti.sql:/docker-entrypoint-initdb.d/zz_002_plan_iti.sql:ro
+      - ./databases/migrations/catalogo/003_admin_general.sql:/docker-entrypoint-initdb.d/zz_003_admin_general.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -98,6 +99,7 @@ services:
       - ./databases/migrations/academico/003_docente.sql:/docker-entrypoint-initdb.d/zz_003_docente.sql:ro
       - ./databases/migrations/academico/004_admin_unidad.sql:/docker-entrypoint-initdb.d/zz_004_admin_unidad.sql:ro
       - ./databases/migrations/academico/005_avance_curricular.sql:/docker-entrypoint-initdb.d/zz_005_avance_curricular.sql:ro
+      - ./databases/migrations/academico/006_admin_general.sql:/docker-entrypoint-initdb.d/zz_006_admin_general.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]

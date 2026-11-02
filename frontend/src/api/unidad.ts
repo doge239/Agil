@@ -3,7 +3,7 @@ import type { CursoDocente } from './docente'
 import type { Asignatura, Restriccion, Solicitud, HorarioItem } from '../types/api'
 export interface PersonaUnidad {id_estudiante?:number;id_docente?:number;id_carrera?:number;id_plan?:number;nombres:string;apellido_paterno:string;apellido_materno:string|null;numero_matricula:string|null;correo_institucional:string}
 export interface CursoUnidad extends CursoDocente {id_asignatura:number;cupo_maximo:number;version:number;docentes:number[]}
-export interface RestriccionUnidad extends Restriccion {id_estudiante:number;version:number;motivo_levantamiento:string|null}
+export interface RestriccionUnidad extends Restriccion {id_estudiante:number;id_unidad:number|null;fecha_creacion:string;version:number;motivo_levantamiento:string|null}
 const base='/academico/unidad'
 export async function getCursosUnidad(periodo?:number){return (await api.get<{cursos:CursoUnidad[];docentes:PersonaUnidad[]}>(`${base}/cursos`,{params:{periodo}})).data}
 export async function getAsignaturasUnidad(){return (await api.get<{asignaturas:Asignatura[]}>(`${base}/asignaturas`)).data}

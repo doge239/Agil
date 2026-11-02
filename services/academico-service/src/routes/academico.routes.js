@@ -30,6 +30,7 @@ router.get(
 );
 
 router.use(verificarToken);
+router.use('/general',require('./general.routes'));
 router.use('/docente',require('./docente.routes'));
 router.use('/unidad',require('./unidad.routes'));
 for (const [ruta,funcion] of Object.entries({periodos:'obtenerPeriodos',oferta:'obtenerOferta','avance-curricular':'obtenerAvance',restricciones:'obtenerRestricciones',solicitudes:'obtenerSolicitudes',encuestas:'obtenerEncuestas',certificados:'obtenerCertificados'})) router.get(`/${ruta}`,academicoController[funcion]);

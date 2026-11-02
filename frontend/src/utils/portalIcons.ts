@@ -20,6 +20,8 @@ export const trazos = {
 }
 export type IconName = keyof typeof trazos
 export function iconoRuta(ruta: string): IconName {
+  if (ruta.includes('periodos')) return 'calendar'
+  if (ruta.includes('auditoria')) return 'shield'
   if (ruta.endsWith('/perfil')) return 'user'
   if (ruta.includes('horario')) return 'calendar'
   if (ruta.includes('avance')) return 'map'

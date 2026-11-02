@@ -15,3 +15,4 @@ router.get('/docente/cursos/:idCurso/estudiantes',verificarToken,usuariosControl
 module.exports = router;
 router.get('/unidad/estudiantes',verificarToken,usuariosController.buscarUnidad);
 router.get('/unidad/docentes',verificarToken,usuariosController.buscarUnidad);
+router.get('/general/estudiantes',verificarToken,usuariosController.buscarGeneral);

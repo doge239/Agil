@@ -157,6 +157,17 @@ app.put('/api/academico/administracion/inscripciones/:idInscripcion/resultado',(
 
 const PORT = process.env.PORT || 4000;
 for(const [metodo,rutas] of Object.entries({
+  get:['resumen','periodos','estudiantes','restricciones','auditoria','cursos'],
+  post:['periodos','restricciones','cursos'],
+  patch:['periodos/:idPeriodo','restricciones/:idRestriccion/levantar','cursos/:idCurso'],
+}))for(const ruta of rutas)app[metodo](`/api/academico/general/${ruta}`,(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
+for(const [metodo,rutas] of Object.entries({
+  get:['unidades','carreras','asignaturas','carreras/:idCarrera/planes','planes/:idPlan/malla','oferta','auditoria'],
+  post:['carreras','asignaturas','carreras/:idCarrera/planes'],
+  patch:['carreras/:idCarrera','asignaturas/:idAsignatura','planes/:idPlan'],
+  put:['planes/:idPlan/malla'],
+}))for(const ruta of rutas)app[metodo](`/api/catalogo/general/${ruta}`,(req,res)=>reenviarPeticion(req,res,`${process.env.CATALOGO_SERVICE_URL}${req.path.slice(4)}`));
+for(const [metodo,rutas] of Object.entries({
   get:['periodos','asignaturas','estudiantes','docentes','cursos','restricciones'],
   post:['cursos','cursos/:idCurso/inscripciones','restricciones'],
   patch:['cursos/:idCurso','restricciones/:idRestriccion/levantar'],

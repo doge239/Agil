@@ -9,6 +9,8 @@ El portal Docente, sus permisos, endpoints y cuenta de desarrollo están documen
 [docs/DOCENTE.md](docs/DOCENTE.md).
 El módulo Administrador de Unidad y sus reglas se describen en
 [docs/ADMIN_UNIDAD.md](docs/ADMIN_UNIDAD.md).
+El módulo Administración General, sus requisitos y cuenta local se describen en
+[docs/ADMIN_GENERAL.md](docs/ADMIN_GENERAL.md).
 La malla visual ITI, sus fuentes, migraciones y cuenta de demostración se describen en
 [docs/AVANCE_CURRICULAR.md](docs/AVANCE_CURRICULAR.md).
 El diseño del portal y sus pruebas visuales se describen en [docs/INTERFAZ.md](docs/INTERFAZ.md).

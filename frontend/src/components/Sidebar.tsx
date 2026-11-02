@@ -27,7 +27,7 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             aria-label={item.label}
-            end={['/','/docente','/unidad'].includes(item.to)}
+            end={['/','/docente','/unidad','/general'].includes(item.to)}
             className={({ isActive }) =>
               cn(
                 'portal-nav-link',

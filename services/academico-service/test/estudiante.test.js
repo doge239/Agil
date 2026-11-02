@@ -32,7 +32,9 @@ before(async()=> {
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/003_docente.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/004_admin_unidad.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/005_avance_curricular.sql'),'utf8'));
+    if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/006_admin_general.sql'),'utf8'));
     if(nombre==='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/catalogo/001_avance_iti.sql'),'utf8'));
+    if(nombre==='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/catalogo/003_admin_general.sql'),'utf8'));
   }
   await usuarios.exec(`INSERT INTO persona(id_usuario,nombres,apellido_paterno,correo_institucional) VALUES(2,'Otro','Estudiante','otro@test'),(3,'Admin','Unidad','admin@test'),(4,'Admin','Otra','otra@test');
     INSERT INTO estudiante(id_persona,numero_matricula,id_carrera,id_plan) VALUES(2,'OTRO',1,1);
@@ -358,4 +360,160 @@ test('Avance: estudiante sin historial y requisitos por confirmar también se re
   } finally {
     await catalogo.exec("UPDATE malla_curricular SET requisitos_estado='CONFIRMADOS' WHERE id_plan=1 AND id_asignatura=2");
   }
+});
+
+
+test('General: JWT y rol protegen todas las rutas institucionales',async()=> {
+  for(const ruta of ['/general/resumen','/general/periodos','/general/estudiantes','/general/restricciones','/general/auditoria']) {
+    assert.equal((await peticion(ruta,{autorizado:false})).status,401);
+    for(const roles of [['ESTUDIANTE'],['DOCENTE'],['ADMIN_UNIDAD']]) assert.equal((await peticion(ruta,{id:3,roles})).status,403);
+    assert.equal((await peticion(ruta,{id:3,roles:['ADMIN_GENERAL']})).status,200);
+  }
+  const r=await fetch(base+'/usuarios/general/estudiantes',{headers:{Authorization:'Bearer '+token(3,['ADMIN_UNIDAD'])}});
+  assert.equal(r.status,403);
+  const gateway=await fetch(base+'/api/academico/general/resumen',{headers:{Authorization:'Bearer '+token(3,['ADMIN_GENERAL'])}});
+  assert.equal(gateway.status,200);
+});
+
+test('General: períodos validan fechas, duplicados, versiones y cierre de inscripción',async()=> {
+  const admin={id:3,roles:['ADMIN_GENERAL']},body={anio:2090,semestre:1,fecha_inicio:'2090-03-01',fecha_fin:'2090-07-31',motivo:'Crear calendario institucional'};
+  assert.equal((await peticion('/general/periodos',{...admin,method:'POST',body:{...body,fecha_inicio:'2090-02-30'}})).status,400);
+  assert.equal((await peticion('/general/periodos',{...admin,method:'POST',body:{...body,semestre:3}})).status,400);
+  const r=await peticion('/general/periodos',{...admin,method:'POST',body});assert.equal(r.status,201);
+  const p=r.data.periodo;assert.equal(p.inscripcion_abierta,false);
+  assert.equal((await peticion('/general/periodos',{...admin,method:'POST',body})).status,409);
+  const ruta='/general/periodos/'+p.id_periodo;
+  const cambio={version:p.version,estado:'ACTIVO',inscripcion_abierta:true,motivo:'Abrir inscripciones institucionales'};
+  assert.equal((await peticion(ruta,{id:3,roles:['ADMIN_UNIDAD'],method:'PATCH',body:cambio})).status,403);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:cambio})).status,200);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:cambio})).status,409);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:{...cambio,version:2,estado:'CERRADO'}})).status,409);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:{...cambio,version:2,estado:'CERRADO',inscripcion_abierta:false}})).status,200);
+  assert.equal((await peticion('/administracion/periodos/'+p.id_periodo+'/inscripcion',{...admin,method:'PATCH',body:{abierta:true}})).status,409);
+  const registro=(await db.query("SELECT detalle FROM auditoria_academica WHERE accion='GENERAL_EDITAR_PERIODO' ORDER BY id_auditoria DESC LIMIT 1")).rows[0];
+  assert.equal(registro.detalle.anterior.inscripcion_abierta,true);assert.equal(registro.detalle.nuevo.estado,'CERRADO');
+});
+
+test('General: restricciones globales, autorrestricciones, versiones y solicitudes pendientes',async()=> {
+  const admin={id:3,roles:['ADMIN_GENERAL']},body={id_estudiante:2,tipo:'Institucional',descripcion:'Restriccion institucional de prueba'};
+  assert.equal((await peticion('/general/restricciones',{...admin,method:'POST',body:{...body,id_estudiante:99999}})).status,404);
+  assert.equal((await peticion('/general/restricciones',{id:1,roles:['ESTUDIANTE','ADMIN_GENERAL'],method:'POST',body:{...body,id_estudiante:1}})).status,403);
+  const r=await peticion('/general/restricciones',{...admin,method:'POST',body});assert.equal(r.status,201);
+  const restriccion=r.data.restriccion;assert.equal(restriccion.id_unidad,null);
+  const solicitud=await peticion('/solicitudes',{id:2,method:'POST',body:{id_restriccion:restriccion.id_restriccion,motivo:'Solicito revision institucional'}});assert.equal(solicitud.status,201);
+  const ruta='/general/restricciones/'+restriccion.id_restriccion+'/levantar';
+  const levantar={version:restriccion.version,motivo:'Revision institucional completada'};
+  assert.equal((await peticion('/unidad/restricciones/'+restriccion.id_restriccion+'/levantar',{id:3,roles:['ADMIN_UNIDAD'],method:'PATCH',body:levantar})).status,403);
+  assert.equal((await peticion(ruta,{id:2,roles:['ESTUDIANTE','ADMIN_GENERAL'],method:'PATCH',body:levantar})).status,403);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:{...levantar,version:999}})).status,409);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:levantar})).status,200);
+  const actual=(await db.query('SELECT * FROM restriccion WHERE id_restriccion=$1',[restriccion.id_restriccion])).rows[0];
+  assert.equal(actual.activa,false);assert.equal(actual.version,2);assert.equal(actual.motivo_levantamiento,levantar.motivo);
+  const resuelta=(await db.query('SELECT * FROM solicitud_levantamiento WHERE id_solicitud=$1',[solicitud.data.solicitud.id_solicitud])).rows[0];
+  assert.equal(resuelta.estado,'APROBADA');assert.equal(resuelta.resuelta_por,3);
+  const filtradas=await peticion('/general/restricciones?estudiante=2',admin);assert.equal(filtradas.status,200);assert.ok(filtradas.data.restricciones.every(r=>r.id_estudiante===2));
+});
+
+test('General: auditoría filtrada y paginada, búsqueda limitada sin datos sensibles',async()=> {
+  const admin={id:3,roles:['ADMIN_GENERAL']};
+  const r=await peticion('/general/auditoria?accion=GENERAL_LEVANTAR_RESTRICCION',admin);
+  assert.equal(r.status,200);assert.ok(r.data.total>0);assert.ok(r.data.auditoria.every(a=>a.accion==='GENERAL_LEVANTAR_RESTRICCION'));
+  assert.equal((await peticion('/general/auditoria?offset=-1',admin)).status,400);
+  assert.equal((await peticion('/general/restricciones?estudiante=abc',admin)).status,400);
+  const personas=await peticion('/general/estudiantes?q=OTRO',admin);assert.equal(personas.status,200);assert.equal(personas.data.estudiantes.length,1);
+  assert.equal(personas.data.estudiantes[0].telefono,undefined);assert.equal(personas.data.estudiantes[0].password_hash,undefined);
+});
+
+
+async function catalogoAdmin(ruta,{roles=['ADMIN_GENERAL'],method='GET',body,autorizado=true}={}) {
+  const r=await fetch(base+'/api/catalogo/general'+ruta,{method,headers:{'Content-Type':'application/json',...(autorizado?{Authorization:'Bearer '+token(3,roles)}:{})},body:body===undefined?undefined:JSON.stringify(body)});
+  return {status:r.status,data:await r.json()};
+}
+let curricular;
+test('Documento General: catálogos restringidos por rol, duplicados, versiones y carrera sin planes',async()=>{
+  for(const ruta of ['/unidades','/carreras','/asignaturas','/carreras/1/planes','/planes/1/malla','/oferta?unidad=1','/auditoria']){
+    assert.equal((await catalogoAdmin(ruta,{autorizado:false})).status,401);
+    for(const roles of [['ESTUDIANTE'],['DOCENTE'],['ADMIN_UNIDAD']])assert.equal((await catalogoAdmin(ruta,{roles})).status,403);
+    assert.equal((await catalogoAdmin(ruta)).status,200);
+  }
+  const body={id_unidad:1,codigo:'TESTADM',nombre:'Carrera de prueba institucional',estado:'ACTIVA',motivo:'Alta institucional de carrera'};
+  assert.equal((await catalogoAdmin('/carreras',{roles:['ADMIN_UNIDAD'],method:'POST',body})).status,403);
+  assert.equal((await catalogoAdmin('/carreras',{method:'POST',body:{...body,id_unidad:9999}})).status,409);
+  const c=await catalogoAdmin('/carreras',{method:'POST',body});assert.equal(c.status,201);
+  assert.equal((await catalogoAdmin('/carreras',{method:'POST',body})).status,409);
+  const ruta='/carreras/'+c.data.carrera.id_carrera;
+  const edit={...body,nombre:'Carrera actualizada',version:1};
+  assert.equal((await catalogoAdmin(ruta,{method:'PATCH',body:edit})).status,200);
+  assert.equal((await catalogoAdmin(ruta,{method:'PATCH',body:edit})).status,409);
+  const a=await catalogoAdmin('/asignaturas',{method:'POST',body:{codigo:'ADM-A',nombre:'Asignatura inicial',creditos:5,estado:'ACTIVA',motivo:'Alta de asignatura institucional'}});assert.equal(a.status,201);
+  const b=await catalogoAdmin('/asignaturas',{method:'POST',body:{codigo:'ADM-B',nombre:'Asignatura avanzada',creditos:6,estado:'ACTIVA',motivo:'Alta de asignatura institucional'}});assert.equal(b.status,201);
+  assert.equal((await catalogoAdmin('/asignaturas',{method:'POST',body:{codigo:'ADM-A',nombre:'Duplicada',creditos:5,estado:'ACTIVA',motivo:'Intento duplicado de prueba'}})).status,409);
+  assert.equal((await catalogoAdmin('/asignaturas',{method:'POST',body:{codigo:'ADM-C',nombre:'Invalida',creditos:-1,estado:'ACTIVA',motivo:'Validacion de creditos'}})).status,400);
+  curricular={carrera:c.data.carrera.id_carrera,a:a.data.asignatura,b:b.data.asignatura};
+});
+
+test('Documento General: borrador, malla transaccional, prerrequisitos por plan y publicación inmutable',async()=>{
+  const {carrera,a,b}=curricular;
+  const r=await catalogoAdmin('/carreras/'+carrera+'/planes',{method:'POST',body:{nombre:'Plan institucional',anio_inicio:2091,motivo:'Crear nueva estructura curricular'}});assert.equal(r.status,201);
+  const plan=r.data.plan;assert.equal(plan.estado,'BORRADOR');curricular.plan=plan;
+  assert.equal((await peticion('/general/cursos',{id:3,roles:['ADMIN_UNIDAD']})).status,403);
+  const oculto=await fetch(base+'/catalogo/carreras/'+carrera+'/malla?plan='+plan.id_plan,{headers:{Authorization:'Bearer '+token(1)}});assert.equal(oculto.status,404);
+  assert.equal((await catalogoAdmin('/planes/'+plan.id_plan,{method:'PATCH',body:{version:1,estado:'ACTIVO',motivo:'Intento de publicar vacio'}})).status,409);
+  const fila=(id,semestre,prerrequisitos=[])=>({id_asignatura:id,semestre,orden:1,obligatoria:true,requisitos_estado:'CONFIRMADOS',requisito_nivel:null,espacio_electivo:false,fuente:null,prerrequisitos,opciones:[]});
+  const malla=[fila(a.id_asignatura,1),fila(b.id_asignatura,2,[a.id_asignatura])];
+  const ruta='/planes/'+plan.id_plan+'/malla',body={version:1,motivo:'Definir asignaturas y requisitos',malla};
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body:{...body,malla:[...malla,malla[0]]}})).status,400);
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body:{...body,malla:[fila(a.id_asignatura,1,[b.id_asignatura]),malla[1]]}})).status,400);
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body:{...body,malla:[fila(99999,1)]}})).status,409);
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body})).status,200);
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body})).status,409);
+  const cambio={version:2,estado:'ACTIVO',motivo:'Publicacion curricular aprobada'};
+  assert.equal((await catalogoAdmin('/planes/'+plan.id_plan,{method:'PATCH',body:cambio})).status,200);
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body:{...body,version:3}})).status,409);
+  const publica=await fetch(base+'/catalogo/carreras/'+carrera+'/malla?plan='+plan.id_plan,{headers:{Authorization:'Bearer '+token(1)}});
+  assert.equal(publica.status,200);const datos=await publica.json();assert.equal(datos.prerrequisitos[0].id_asignatura_requisito,a.id_asignatura);
+  assert.equal((await catalogo.query('SELECT * FROM prerrequisito WHERE id_asignatura=$1',[b.id_asignatura])).rows.length,0);
+  const protegida=await catalogoAdmin('/asignaturas/'+a.id_asignatura,{method:'PATCH',body:{...a,codigo:'OTRO-CODIGO',motivo:'No alterar el historial curricular'}});assert.equal(protegida.status,409);
+  const copia=await catalogoAdmin('/carreras/'+carrera+'/planes',{method:'POST',body:{nombre:'Revision del plan',anio_inicio:2092,id_plan_origen:plan.id_plan,motivo:'Copiar estructura para mantenerla'}});assert.equal(copia.status,201);
+  const contenido=await catalogoAdmin('/planes/'+copia.data.plan.id_plan+'/malla');assert.equal(contenido.data.malla.length,2);assert.deepEqual(contenido.data.malla[1].prerrequisitos,[a.id_asignatura]);
+  const edicion=await catalogoAdmin('/planes/'+copia.data.plan.id_plan+'/malla',{method:'PUT',body:{version:1,motivo:'Revision sin modificar plan previo',malla:[fila(a.id_asignatura,1),fila(b.id_asignatura,2)]}});assert.equal(edicion.status,200);
+  const original=await catalogoAdmin('/planes/'+plan.id_plan+'/malla');assert.deepEqual(original.data.malla[1].prerrequisitos,[a.id_asignatura]);
+  assert.equal((await catalogoAdmin('/carreras/'+carrera,{method:'PATCH',body:{id_unidad:99999,codigo:'TESTADM',nombre:'Otra',estado:'ACTIVA',version:2,motivo:'Intento de cambiar unidad'}})).status,409);
+});
+
+test('Documento General: gestión general de cursos, ocupación y períodos cerrados',async()=>{
+  const admin={id:3,roles:['ADMIN_GENERAL']},a=curricular.a;
+  const body={id_asignatura:a.id_asignatura,id_unidad:1,id_periodo:1,seccion:80,cupo_maximo:10,motivo:'Registrar oferta general de cursos'};
+  assert.equal((await peticion('/general/cursos',{id:3,roles:['ADMIN_UNIDAD'],method:'POST',body})).status,403);
+  assert.equal((await peticion('/general/cursos',{...admin,method:'POST',body:{...body,id_unidad:9999}})).status,409);
+  assert.equal((await peticion('/general/cursos',{...admin,method:'POST',body:{...body,id_periodo:2}})).status,409);
+  const creado=await peticion('/general/cursos',{...admin,method:'POST',body});assert.equal(creado.status,201);const c=creado.data.curso;
+  assert.equal((await peticion('/general/cursos',{...admin,method:'POST',body})).status,409);
+  const ruta='/general/cursos/'+c.id_curso,cambio={version:1,cupo_maximo:20,estado:'ACTIVO',motivo:'Ampliar cupos de oferta general'};
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:cambio})).status,200);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:cambio})).status,409);
+  await db.query("INSERT INTO inscripcion(id_curso,id_estudiante) VALUES($1,1),($1,2)",[c.id_curso]);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:{...cambio,version:2,cupo_maximo:1}})).status,409);
+  assert.equal((await peticion(ruta,{...admin,method:'PATCH',body:{...cambio,version:2,estado:'INACTIVO'}})).status,409);
+  const lista=await peticion('/general/cursos?periodo=1',admin);assert.equal(lista.status,200);assert.ok(lista.data.cursos.some(r=>r.id_curso===c.id_curso));
+  const auditoria=await catalogoAdmin('/auditoria?accion=GENERAL_GUARDAR_MALLA');assert.equal(auditoria.status,200);assert.ok(auditoria.data.total>=2);
+  assert.ok(auditoria.data.auditoria.every(r=>r.detalle.motivo));
+});
+
+
+test('Documento General: gestiona otra unidad y una mantención fallida conserva la malla',async()=>{
+  const unidad=(await catalogo.query("INSERT INTO unidad_academica(codigo,nombre) VALUES('OTRAADM','Otra unidad institucional') RETURNING *")).rows[0];
+  const carrera=await catalogoAdmin('/carreras',{method:'POST',body:{id_unidad:unidad.id_unidad,codigo:'OTRAADM',nombre:'Carrera de otra unidad',estado:'ACTIVA',motivo:'Registrar carrera de otra unidad'}});assert.equal(carrera.status,201);
+  const plan=await catalogoAdmin('/carreras/'+carrera.data.carrera.id_carrera+'/planes',{method:'POST',body:{nombre:'Plan otra unidad',anio_inicio:2091,motivo:'Crear plan para otra unidad'}});assert.equal(plan.status,201);
+  const fila={id_asignatura:curricular.a.id_asignatura,semestre:1,orden:1,obligatoria:true,requisitos_estado:'CONFIRMADOS',requisito_nivel:null,espacio_electivo:false,fuente:null,prerrequisitos:[],opciones:[]};
+  const ruta='/planes/'+plan.data.plan.id_plan+'/malla';
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body:{version:1,motivo:'Mantencion inicial de malla',malla:[fila]}})).status,200);
+  assert.equal((await catalogoAdmin(ruta,{method:'PUT',body:{version:2,motivo:'corto',malla:[]}})).status,400);
+  const conservada=await catalogoAdmin(ruta);assert.equal(conservada.data.malla.length,1);assert.equal(conservada.data.plan.version,2);
+  assert.equal((await catalogoAdmin('/planes/'+plan.data.plan.id_plan,{method:'PATCH',body:{version:2,estado:'ACTIVO',motivo:'Publicar plan de otra unidad'}})).status,200);
+  const admin={id:3,roles:['ADMIN_GENERAL']};
+  const curso=await peticion('/general/cursos',{...admin,method:'POST',body:{id_asignatura:curricular.a.id_asignatura,id_unidad:unidad.id_unidad,id_periodo:1,seccion:81,cupo_maximo:30,motivo:'Crear curso fuera de la unidad propia'}});assert.equal(curso.status,201);
+  assert.equal((await peticion('/general/cursos/'+curso.data.curso.id_curso,{...admin,method:'PATCH',body:{version:1,cupo_maximo:35,estado:'ACTIVO',motivo:'Administrar curso de otra unidad'}})).status,200);
+  const filtrada=await peticion('/general/cursos?unidad='+unidad.id_unidad,admin);assert.equal(filtrada.status,200);assert.ok(filtrada.data.cursos.every(c=>c.id_unidad===unidad.id_unidad));assert.equal(filtrada.data.cursos.length,1);
+  assert.equal((await peticion('/unidad/cursos/'+curso.data.curso.id_curso,{id:3,roles:['ADMIN_UNIDAD'],method:'PATCH',body:{version:2,cupo_maximo:40,estado:'ACTIVO'}})).status,403);
 });

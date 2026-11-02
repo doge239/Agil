@@ -4,6 +4,7 @@ const router = express.Router();
 
 const verificarToken = require("../middlewares/auth.middleware");
 const catalogoController = require("../controllers/catalogo.controller");
+router.use('/general',verificarToken,require('./general.routes'));
 
 router.get(
   "/carreras",

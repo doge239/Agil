@@ -156,8 +156,8 @@ exports.resolverSolicitud=manejar(async(req,res)=> {
     const r=await db.query(`SELECT s.*,r.id_unidad,r.id_estudiante FROM solicitud_levantamiento s JOIN restriccion r USING(id_restriccion) WHERE s.id_solicitud=$1 FOR UPDATE OF s,r`,[id]);
     exigir(r.rowCount,404,'Solicitud no encontrada'); const s=r.rows[0]; autorizarUnidad(req,p,s.id_unidad); exigir(s.id_estudiante!==p.id_estudiante,403,'No puedes resolver tu propia solicitud'); exigir(s.estado==='PENDIENTE',409,'Solicitud ya resuelta');
     await db.query('UPDATE solicitud_levantamiento SET estado=$2,resolucion=$3,resuelta_por=$4,fecha_resolucion=now() WHERE id_solicitud=$1',[id,req.body.estado,motivo,req.usuario.id_usuario]);
-    if(req.body.estado==='APROBADA') await db.query('UPDATE restriccion SET activa=false,fecha_levantamiento=now(),levantada_por=$2 WHERE id_restriccion=$1',[s.id_restriccion,req.usuario.id_usuario]);
-    await auditar(db,req,'RESOLVER_SOLICITUD',{id_solicitud:id,estado:req.body.estado});
+    if(req.body.estado==='APROBADA') await db.query('UPDATE restriccion SET activa=false,fecha_levantamiento=now(),levantada_por=$2,motivo_levantamiento=$3,version=version+1 WHERE id_restriccion=$1',[s.id_restriccion,req.usuario.id_usuario,motivo]);
+    await auditar(db,req,'RESOLVER_SOLICITUD',{id_solicitud:id,estado:req.body.estado,anterior:s,motivo});
   }); res.json({mensaje:'Solicitud resuelta'});
 });
 exports.crearEncuesta=manejar(async(req,res)=> {
@@ -175,8 +175,11 @@ exports.configurarInscripcion=manejar(async(req,res)=> {
   exigir(req.usuario?.roles?.includes('ADMIN_GENERAL'),403,'Se requiere Administración General');
   const id=idPositivo(req.params.idPeriodo,'Período'); exigir(typeof req.body.abierta==='boolean',400,'Indica abierta como booleano');
   await transaccion(async db=> {
-    const r=await db.query('UPDATE periodo_academico SET inscripcion_abierta=$2 WHERE id_periodo=$1 RETURNING id_periodo',[id,req.body.abierta]);
-    exigir(r.rowCount,404,'Período no encontrado');await auditar(db,req,'CONFIGURAR_INSCRIPCION',{id_periodo:id,abierta:req.body.abierta});
+    const anterior=(await db.query('SELECT * FROM periodo_academico WHERE id_periodo=$1 FOR UPDATE',[id])).rows[0];
+    exigir(anterior,404,'Período no encontrado');
+    exigir(!req.body.abierta||anterior.estado==='ACTIVO',409,'El período está cerrado');
+    await db.query('UPDATE periodo_academico SET inscripcion_abierta=$2,version=version+1 WHERE id_periodo=$1',[id,req.body.abierta]);
+    await auditar(db,req,'CONFIGURAR_INSCRIPCION',{id_periodo:id,abierta:req.body.abierta,anterior});
   }); res.json({mensaje:'Disponibilidad de inscripción actualizada'});
 });
 exports.registrarResultado=manejar(async(req,res)=> {

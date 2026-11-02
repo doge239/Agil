@@ -22,6 +22,10 @@ import { CursosUnidad } from './pages/unidad/CursosUnidad'
 import { CursoUnidad } from './pages/unidad/CursoUnidad'
 import { RestriccionesUnidad } from './pages/unidad/RestriccionesUnidad'
 import { SolicitudesUnidad } from './pages/unidad/SolicitudesUnidad'
+import { ResumenGeneral,PeriodosGeneral,RestriccionesGeneral,AuditoriaGeneral } from './pages/general/AdministracionGeneral'
+import { CarrerasGeneral,AsignaturasGeneral,PlanesGeneral } from './pages/general/GestionCatalogo'
+import { MallaGeneral } from './pages/general/MallaGeneral'
+import { CursosGeneral } from './pages/general/CursosGeneral'
 
 export default function App() {
   return (
@@ -63,6 +67,20 @@ export default function App() {
               <Route path="/unidad/restricciones" element={<RestriccionesUnidad/>}/>
               <Route path="/unidad/solicitudes" element={<SolicitudesUnidad/>}/>
               <Route path="/unidad/perfil" element={<MiPerfil unidad/>}/>
+            </Route>
+          </Route>
+          <Route element={<ProtectedRoute roles={['ADMIN_GENERAL']} />}>
+            <Route element={<Layout/>}>
+              <Route path="/general" element={<ResumenGeneral/>}/>
+              <Route path="/general/carreras" element={<CarrerasGeneral/>}/>
+              <Route path="/general/asignaturas" element={<AsignaturasGeneral/>}/>
+              <Route path="/general/cursos" element={<CursosGeneral/>}/>
+              <Route path="/general/carreras/:idCarrera/planes" element={<PlanesGeneral/>}/>
+              <Route path="/general/planes/:idPlan" element={<MallaGeneral/>}/>
+              <Route path="/general/periodos" element={<PeriodosGeneral/>}/>
+              <Route path="/general/restricciones" element={<RestriccionesGeneral/>}/>
+              <Route path="/general/solicitudes" element={<SolicitudesUnidad general/>}/>
+              <Route path="/general/auditoria" element={<AuditoriaGeneral/>}/>
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

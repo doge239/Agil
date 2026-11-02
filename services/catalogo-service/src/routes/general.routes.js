@@ -1,0 +1,16 @@
+const router=require('express').Router(),c=require('../controllers/general.controller');
+router.get('/unidades',c.unidades);
+router.get('/carreras',c.carreras);
+router.post('/carreras',c.guardarCarrera);
+router.patch('/carreras/:idCarrera',c.guardarCarrera);
+router.get('/asignaturas',c.asignaturas);
+router.post('/asignaturas',c.guardarAsignatura);
+router.patch('/asignaturas/:idAsignatura',c.guardarAsignatura);
+router.get('/carreras/:idCarrera/planes',c.planes);
+router.post('/carreras/:idCarrera/planes',c.crearPlan);
+router.get('/planes/:idPlan/malla',c.malla);
+router.put('/planes/:idPlan/malla',c.guardarMalla);
+router.patch('/planes/:idPlan',c.editarPlan);
+router.get('/oferta',c.oferta);
+router.get('/auditoria',c.auditoria);
+module.exports=router;

@@ -27,4 +27,14 @@ export const unidadNavItems: NavItem[] = [
   {to:'/unidad/solicitudes',label:'Solicitudes'},
   {to:'/unidad/perfil',label:'Mi perfil'},
 ]
-export function getNavItems(path:string) {return path.startsWith('/unidad')?unidadNavItems:path.startsWith('/docente')?docenteNavItems:navItems}
+export const generalNavItems: NavItem[] = [
+  {to:'/general',label:'Administración General'},
+  {to:'/general/carreras',label:'Carreras y mallas'},
+  {to:'/general/asignaturas',label:'Catálogo de asignaturas'},
+  {to:'/general/cursos',label:'Gestión de cursos'},
+  {to:'/general/periodos',label:'Períodos e inscripción'},
+  {to:'/general/restricciones',label:'Restricciones'},
+  {to:'/general/solicitudes',label:'Solicitudes'},
+  {to:'/general/auditoria',label:'Auditoría'},
+]
+export function getNavItems(path:string) {return path.startsWith('/general')?generalNavItems:path.startsWith('/unidad')?unidadNavItems:path.startsWith('/docente')?docenteNavItems:navItems}
