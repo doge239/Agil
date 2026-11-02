@@ -1,0 +1,16 @@
+const router=require('express').Router(),c=require('../controllers/unidad.controller');
+router.get('/periodos',c.periodos);
+router.get('/asignaturas',c.asignaturas);
+router.get('/estudiantes',c.buscar);
+router.get('/docentes',c.buscar);
+router.get('/cursos',c.cursos);
+router.post('/cursos',c.crearCurso);
+router.patch('/cursos/:idCurso',c.editarCurso);
+router.put('/cursos/:idCurso/horarios',c.horarios);
+router.put('/cursos/:idCurso/docentes/:idDocente',c.docente);
+router.delete('/cursos/:idCurso/docentes/:idDocente',c.docente);
+router.post('/cursos/:idCurso/inscripciones',c.inscribir);
+router.get('/restricciones',c.restricciones);
+router.post('/restricciones',c.crearRestriccion);
+router.patch('/restricciones/:idRestriccion/levantar',c.levantarRestriccion);
+module.exports=router;

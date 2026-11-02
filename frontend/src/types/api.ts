@@ -31,6 +31,7 @@ export interface Perfil {
   id_plan: number | null
   id_docente: number | null
   id_unidad_docente: number | null
+  id_unidad_admin: number | null
 }
 
 export interface PerfilResponse {

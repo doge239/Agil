@@ -33,7 +33,7 @@ async function curso(req,p,db=pool,escritura=false) {
   const id=idPositivo(req.params.idCurso,'Curso');
   const r=await db.query(`SELECT c.*,pa.estado AS estado_periodo,pa.fecha_inicio,pa.fecha_fin
     FROM curso c JOIN periodo_academico pa USING(id_periodo)
-    JOIN curso_docente cd ON cd.id_curso=c.id_curso AND cd.id_docente=$2
+    JOIN curso_docente cd ON cd.id_curso=c.id_curso AND cd.id_docente=$2 AND cd.activa
     WHERE c.id_curso=$1 ${escritura?'FOR UPDATE OF c FOR SHARE OF cd,pa':''}`,[id,p.id_docente]);
   exigir(r.rowCount,403,'No tienes asignado este curso');
   if(escritura) exigir(r.rows[0].estado==='ACTIVO'&&r.rows[0].estado_periodo==='ACTIVO',409,'El curso o período está cerrado para modificaciones');
@@ -74,7 +74,7 @@ exports.cursos=docente(async(req,res,p)=> {
     (SELECT count(*)::int FROM inscripcion i WHERE i.id_curso=c.id_curso AND i.estado IN ('ACTIVA','FINALIZADA')) AS inscritos,
     COALESCE((SELECT json_agg(h ORDER BY h.dia_semana,h.hora_inicio) FROM horario h WHERE h.id_curso=c.id_curso),'[]') AS horarios
     FROM curso c JOIN curso_docente cd USING(id_curso) JOIN periodo_academico pa USING(id_periodo)
-    WHERE cd.id_docente=$1 AND ($2::int IS NULL OR c.id_periodo=$2) ORDER BY pa.anio DESC,pa.semestre DESC,c.id_curso`,[p.id_docente,id]);
+    WHERE cd.id_docente=$1 AND cd.activa AND ($2::int IS NULL OR c.id_periodo=$2) ORDER BY pa.anio DESC,pa.semestre DESC,c.id_curso`,[p.id_docente,id]);
   const {asignaturas}=await consultar(req,'CATALOGO_SERVICE_URL','/catalogo/asignaturas');
   res.json({cursos:r.rows.map(c=>({...c,nombre:asignaturas.find(a=>a.id_asignatura===c.id_asignatura)?.nombre??`Asignatura #${c.id_asignatura}`,codigo:asignaturas.find(a=>a.id_asignatura===c.id_asignatura)?.codigo??''}))});
 });

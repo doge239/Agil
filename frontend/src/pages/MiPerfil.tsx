@@ -15,7 +15,7 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | number | 
   )
 }
 
-export function MiPerfil({docente=false}:{docente?:boolean}) {
+export function MiPerfil({docente=false,unidad=false}:{docente?:boolean;unidad?:boolean}) {
   const { data, loading, error, refetch } = useFetch(() => getMiPerfil(), [])
   const carreras = useFetch(() => getCarreras(), [])
 
@@ -61,7 +61,7 @@ export function MiPerfil({docente=false}:{docente?:boolean}) {
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">
             Datos académicos
           </h2>
-          {docente?<><Dato etiqueta="Identificador docente" valor={perfil.id_docente}/><Dato etiqueta="Unidad académica" valor={perfil.id_unidad_docente}/></>:<>
+          {unidad?<Dato etiqueta="Unidad administrada" valor={perfil.id_unidad_admin}/>:docente?<><Dato etiqueta="Identificador docente" valor={perfil.id_docente}/><Dato etiqueta="Unidad académica" valor={perfil.id_unidad_docente}/></>:<>
             <Dato etiqueta="Número de matrícula" valor={perfil.numero_matricula} />
             <Dato etiqueta="Carrera" valor={carreraNombre} />
             <Dato etiqueta="Año de ingreso" valor={perfil.anio_ingreso} />

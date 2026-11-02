@@ -7,6 +7,8 @@ El alcance ampliado de Estudiante, las migraciones sin reinicialización y las r
 están documentados en [docs/ESTUDIANTE.md](docs/ESTUDIANTE.md).
 El portal Docente, sus permisos, endpoints y cuenta de desarrollo están documentados en
 [docs/DOCENTE.md](docs/DOCENTE.md).
+El módulo Administrador de Unidad y sus reglas se describen en
+[docs/ADMIN_UNIDAD.md](docs/ADMIN_UNIDAD.md).
 
 ## Arquitectura
 

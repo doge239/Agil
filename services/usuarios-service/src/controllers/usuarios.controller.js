@@ -56,6 +56,29 @@ module.exports = {
   obtenerMiPerfil,
 };
 
+module.exports.buscarUnidad = async(req,res)=> {
+  if(!req.usuario?.roles?.includes('ADMIN_UNIDAD'))return res.status(403).json({mensaje:'Se requiere Administración de Unidad'});
+  try {
+    const p=(await pool.query('SELECT au.id_unidad FROM administrador_unidad au JOIN persona p USING(id_persona) WHERE p.id_usuario=$1',[req.usuario.id_usuario])).rows[0];
+    if(!p?.id_unidad)return res.status(403).json({mensaje:'Administrador sin unidad asignada'});
+    const id=req.query.id===undefined?null:Number(req.query.id),q=req.query.q===undefined?'':req.query.q;
+    if((id!==null&&(!Number.isInteger(id)||id<=0||id>2147483647))||typeof q!=='string'||q.length>100)return res.status(400).json({mensaje:'Búsqueda inválida'});
+    const esDocente=req.path.endsWith('/docentes');
+    let ids=[];
+    if(!esDocente) {
+      const r=await fetch(`${process.env.CATALOGO_SERVICE_URL||'http://localhost:4003'}/catalogo/carreras`,{headers:{Authorization:req.headers.authorization},signal:AbortSignal.timeout(8000)});
+      if(!r.ok)return res.status(503).json({mensaje:'No se pudo validar la unidad de las carreras'});
+      ids=(await r.json()).carreras.filter(c=>c.id_unidad===p.id_unidad).map(c=>c.id_carrera);
+    }
+    const tabla=esDocente?'docente':'estudiante',clave=esDocente?'id_docente':'id_estudiante';
+    const r=await pool.query(`SELECT e.${clave},e.${esDocente?'id_unidad':'id_carrera'},${esDocente?'NULL::int AS id_plan,NULL::text AS numero_matricula':'e.id_plan,e.numero_matricula'},p.nombres,p.apellido_paterno,p.apellido_materno,p.correo_institucional
+      FROM ${tabla} e JOIN persona p USING(id_persona) WHERE ${esDocente?'e.id_unidad=$1':'e.id_carrera=ANY($1::int[])'}
+      AND ($2::int IS NULL OR e.${clave}=$2) AND (p.nombres||' '||p.apellido_paterno||' '||COALESCE(p.apellido_materno,'')||' '||${esDocente?'p.correo_institucional':'e.numero_matricula'}) ILIKE $3
+      ORDER BY p.apellido_paterno,p.nombres LIMIT 100`,[esDocente?p.id_unidad:ids,id,`%${q}%`]);
+    res.json({[esDocente?'docentes':'estudiantes']:r.rows});
+  }catch(e){console.error(e.message);res.status(503).json({mensaje:'No se pudo consultar los perfiles de la unidad'});}
+};
+
 // La lista nunca se obtiene a partir de IDs arbitrarios enviados por el navegador.
 // Académico valida nuevamente la asignación y proporciona las inscripciones autorizadas.
 module.exports.obtenerEstudiantesDocente = async(req,res)=> {

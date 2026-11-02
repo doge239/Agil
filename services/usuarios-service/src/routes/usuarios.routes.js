@@ -13,3 +13,5 @@ router.get(
 
 router.get('/docente/cursos/:idCurso/estudiantes',verificarToken,usuariosController.obtenerEstudiantesDocente);
 module.exports = router;
+router.get('/unidad/estudiantes',verificarToken,usuariosController.buscarUnidad);
+router.get('/unidad/docentes',verificarToken,usuariosController.buscarUnidad);

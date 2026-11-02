@@ -94,6 +94,7 @@ services:
       - ./databases/migrations/academico/001_estudiante.sql:/docker-entrypoint-initdb.d/zz_001_estudiante.sql:ro
       - ./databases/migrations/academico/002_asignacion_familiar.sql:/docker-entrypoint-initdb.d/zz_002_asignacion_familiar.sql:ro
       - ./databases/migrations/academico/003_docente.sql:/docker-entrypoint-initdb.d/zz_003_docente.sql:ro
+      - ./databases/migrations/academico/004_admin_unidad.sql:/docker-entrypoint-initdb.d/zz_004_admin_unidad.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -139,6 +140,7 @@ services:
     environment:
       PORT: 4002
       ACADEMICO_SERVICE_URL: http://academico-service:4004
+      CATALOGO_SERVICE_URL: http://catalogo-service:4003
       DB_HOST: usuarios-db
       DB_PORT: 5432
       DB_NAME: usuarios_db

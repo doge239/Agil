@@ -21,3 +21,10 @@ export const docenteNavItems: NavItem[] = [
   {to:'/docente',label:'Mis cursos'},
   {to:'/docente/perfil',label:'Mi perfil'},
 ]
+export const unidadNavItems: NavItem[] = [
+  {to:'/unidad',label:'Cursos de la unidad'},
+  {to:'/unidad/restricciones',label:'Restricciones'},
+  {to:'/unidad/solicitudes',label:'Solicitudes'},
+  {to:'/unidad/perfil',label:'Mi perfil'},
+]
+export function getNavItems(path:string) {return path.startsWith('/unidad')?unidadNavItems:path.startsWith('/docente')?docenteNavItems:navItems}

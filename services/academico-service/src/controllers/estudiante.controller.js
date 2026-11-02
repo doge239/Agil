@@ -72,29 +72,8 @@ exports.obtenerOferta=estudiante(async(req,res,p)=> {
 });
 exports.inscribir=estudiante(async(req,res,p)=> {
   const id=idPositivo(req.body.id_curso,'Curso'); const m=await plan(req,p); const cat=await catalogo(req);
-  const inscripcion=await transaccion(async db=> {
-    await db.query('SELECT pg_advisory_xact_lock(17001,$1)',[p.id_estudiante]);
-    const r=await db.query(`SELECT c.*,pa.inscripcion_abierta,pa.estado AS estado_periodo FROM curso c JOIN periodo_academico pa USING(id_periodo) WHERE c.id_curso=$1 FOR UPDATE OF c,pa`,[id]);
-    exigir(r.rowCount,404,'Curso no encontrado'); const c=r.rows[0];
-    exigir(c.estado==='ACTIVO'&&c.estado_periodo==='ACTIVO'&&c.inscripcion_abierta,409,'La inscripción no está abierta para este curso');
-    exigir(m.malla.some(a=>a.id_asignatura===c.id_asignatura)&&cat.some(a=>a.id_asignatura===c.id_asignatura&&a.estado==='ACTIVA'),403,'Asignatura no disponible en tu plan');
-    const restricciones=await db.query('SELECT 1 FROM restriccion WHERE id_estudiante=$1 AND activa AND (id_unidad IS NULL OR id_unidad=$2)',[p.id_estudiante,c.id_unidad]);
-    exigir(!restricciones.rowCount,409,'Tienes restricciones activas. Puedes solicitar su levantamiento.');
-    const previas=await db.query(`SELECT cu.id_asignatura,cu.id_periodo FROM inscripcion i JOIN curso cu USING(id_curso) WHERE i.id_estudiante=$1 AND i.estado='ACTIVA'`,[p.id_estudiante]);
-    exigir(!previas.rows.some(i=>i.id_periodo===c.id_periodo&&i.id_asignatura===c.id_asignatura),409,'Ya estás inscrito en esta asignatura durante el período');
-    const finales=await resultados(db,p.id_estudiante); const aprobadas=new Set(finales.filter(r=>Number(r.nota)>=Number(r.nota_minima)).map(r=>r.id_asignatura));
-    exigir(!aprobadas.has(c.id_asignatura),409,'La asignatura ya está aprobada');
-    exigir(m.prerrequisitos.filter(a=>a.id_asignatura===c.id_asignatura).every(a=>aprobadas.has(a.id_asignatura_requisito)),409,'No cumples los prerrequisitos');
-    const horarios=await db.query('SELECT * FROM horario WHERE id_curso=$1',[id]);
-    const actuales=await db.query(`SELECT h.* FROM horario h JOIN curso c USING(id_curso) JOIN inscripcion i USING(id_curso) WHERE i.id_estudiante=$1 AND i.estado='ACTIVA' AND c.id_periodo=$2`,[p.id_estudiante,c.id_periodo]);
-    exigir(!horarios.rows.some(a=>actuales.rows.some(b=>hayChoque(a,b))),409,'Existe un choque de horario');
-    const ocupacion=(await db.query("SELECT count(*)::int AS n FROM inscripcion WHERE id_curso=$1 AND estado='ACTIVA'",[id])).rows[0].n;
-    exigir(ocupacion<c.cupo_maximo,409,'El curso ya no tiene cupos');
-    const nueva=await db.query(`INSERT INTO inscripcion(id_estudiante,id_curso) VALUES($1,$2) ON CONFLICT(id_estudiante,id_curso) DO UPDATE SET estado='ACTIVA',fecha_inscripcion=now(),tipo_inscripcion='ESTUDIANTE' WHERE inscripcion.estado='ANULADA' RETURNING *`,[p.id_estudiante,id]);
-    exigir(nueva.rowCount,409,'Ya existe una inscripción para este curso');
-    await db.query('UPDATE curso SET cupo_actual=$2 WHERE id_curso=$1',[id,ocupacion+1]);
-    await auditar(db,req,'INSCRIPCION_ESTUDIANTE',{id_curso:id,id_estudiante:p.id_estudiante}); return nueva.rows[0];
-  }); res.status(201).json({inscripcion,mensaje:'Inscripción realizada'});
+  const inscripcion=await require('../domain/inscripcion').inscribirCurso({req,p,m,cat,id});
+  res.status(201).json({inscripcion,mensaje:'Inscripción realizada'});
 });
 exports.obtenerAvance=estudiante(async(req,res,p)=> {
   const m=await plan(req,p); const finales=await resultados(pool,p.id_estudiante);

@@ -8,8 +8,8 @@ import { Spinner } from '../components/Spinner'
 import { useLocation } from 'react-router-dom'
 export interface Periodo { id_periodo:number; anio:number; semestre:number; estado:string; vigente:boolean; inscripcion_abierta:boolean }
 export function PeriodoProvider({children}:{children:ReactNode}) {
-  const esDocente=useLocation().pathname.startsWith('/docente')
-  const ruta=esDocente?'/academico/docente/periodos':'/academico/periodos'
+  const path=useLocation().pathname
+  const ruta=path.startsWith('/unidad')?'/academico/unidad/periodos':path.startsWith('/docente')?'/academico/docente/periodos':'/academico/periodos'
   const {data,loading,error,refetch}=useFetch(async()=> (await api.get<{periodos:Periodo[]}>(ruta)).data,[ruta])
   const [seleccion,setSeleccion]=useState<number | undefined>()
   const periodos=data?.periodos??[]

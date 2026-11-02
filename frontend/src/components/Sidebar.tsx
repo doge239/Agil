@@ -1,9 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { cn } from '../utils/cn'
-import { navItems, docenteNavItems } from './navItems'
+import { getNavItems } from './navItems'
 
 export function Sidebar() {
-  const items=useLocation().pathname.startsWith('/docente')?docenteNavItems:navItems
+  const items=getNavItems(useLocation().pathname)
   return (
     <aside className="hidden w-56 shrink-0 md:block">
       <nav className="sticky top-20 flex flex-col gap-1 rounded-xl bg-surface p-3 shadow-sm">
@@ -11,7 +11,7 @@ export function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === '/' || item.to === '/docente'}
+            end={['/','/docente','/unidad'].includes(item.to)}
             className={({ isActive }) =>
               cn(
                 'rounded-lg px-3 py-2 text-sm font-medium transition-colors',

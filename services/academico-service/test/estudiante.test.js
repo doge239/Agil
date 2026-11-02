@@ -30,6 +30,7 @@ before(async()=> {
     if(nombre!=='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations',nombre,'001_estudiante.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/002_asignacion_familiar.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/003_docente.sql'),'utf8'));
+    if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/004_admin_unidad.sql'),'utf8'));
   }
   await usuarios.exec(`INSERT INTO persona(id_usuario,nombres,apellido_paterno,correo_institucional) VALUES(2,'Otro','Estudiante','otro@test'),(3,'Admin','Unidad','admin@test'),(4,'Admin','Otra','otra@test');
     INSERT INTO estudiante(id_persona,numero_matricula,id_carrera,id_plan) VALUES(2,'OTRO',1,1);
@@ -266,4 +267,61 @@ test('Docente: gateway y períodos cerrados conservan la separación de permisos
   await db.exec("UPDATE periodo_academico SET estado='CERRADO' WHERE id_periodo=1");
   assert.equal((await peticion('/docente/cursos/2/evaluaciones',{id:10,roles:['DOCENTE'],method:'POST',body:{nombre:'Fuera de plazo',porcentaje:5,fecha:null}})).status,409);
   assert.equal((await peticion('/docente/cursos/2/evaluaciones',{id:10,roles:['DOCENTE']})).status,200);
+});
+
+let cursoUnidadId;
+test('Unidad: búsqueda y cursos permanecen dentro de su unidad',async()=>{
+  await db.exec("UPDATE periodo_academico SET estado='ACTIVO',inscripcion_abierta=true WHERE id_periodo=1");
+  await catalogo.exec("INSERT INTO unidad_academica(codigo,nombre) VALUES('OTRA','Otra unidad'); INSERT INTO carrera(id_unidad,codigo,nombre) VALUES(2,'OTRA','Otra carrera'); INSERT INTO plan_estudio(id_carrera,nombre,anio_inicio) VALUES(2,'Otro plan',2026)");
+  await usuarios.exec("INSERT INTO persona(id_persona,id_usuario,nombres,apellido_paterno,correo_institucional) VALUES(20,20,'Externo','Estudiante','externo@test'); INSERT INTO estudiante(id_persona,numero_matricula,id_carrera,id_plan) VALUES(20,'EXTERNO',2,3)");
+  await db.exec('INSERT INTO curso(id_asignatura,id_periodo,id_unidad,seccion,cupo_maximo) VALUES(1,1,2,99,30)');
+  const opciones={id:3,roles:['ADMIN_UNIDAD']};
+  const r=await peticion('/unidad/cursos?periodo=1',opciones);assert.equal(r.status,200);assert.ok(r.data.cursos.every(c=>c.id_unidad===1));
+  const perfiles=await peticion('/unidad/estudiantes',opciones);assert.equal(perfiles.status,200);assert.ok(perfiles.data.estudiantes.every(e=>e.id_carrera===1));assert.equal(perfiles.data.estudiantes.some(e=>e.numero_matricula==='EXTERNO'),false);
+  const sinRol=await peticion('/unidad/cursos',{id:1});assert.equal(sinRol.status,403);
+  const externos=await peticion('/unidad/cursos',{id:4,roles:['ADMIN_UNIDAD']});assert.ok(externos.data.cursos.every(c=>c.id_unidad===2));
+  assert.equal((await peticion('/unidad/cursos/1',{id:4,roles:['ADMIN_UNIDAD'],method:'PATCH',body:{cupo_maximo:50,estado:'ACTIVO',version:1}})).status,403);
+  assert.equal((await peticion('/unidad/cursos',{...opciones,method:'POST',body:{id_asignatura:1,id_periodo:1,seccion:10,cupo_maximo:1,id_unidad:2}})).status,201);
+  const propio=(await peticion('/unidad/cursos',opciones)).data.cursos.find(c=>c.seccion===10);assert.equal(propio.id_unidad,1);
+  cursoUnidadId=propio.id_curso;
+});
+
+test('Unidad: manual usa validaciones compartidas y registra motivo y autor',async()=>{
+  const opciones={id:3,roles:['ADMIN_UNIDAD']};
+  // Curso del plan sin prerrequisitos y sin conflicto con las inscripciones de este alumno.
+  const r=await peticion('/unidad/cursos',{...opciones,method:'POST',body:{id_asignatura:2,id_periodo:1,seccion:11,cupo_maximo:1}});assert.equal(r.status,201);
+  const curso=r.data.curso.id_curso,ruta=`/unidad/cursos/${curso}/inscripciones`;
+  assert.equal((await peticion(ruta,{...opciones,method:'POST',body:{id_estudiante:4,motivo:'Inscripción solicitada por estudiante'}})).status,403);
+  const inscrito=await peticion(ruta,{...opciones,method:'POST',body:{id_estudiante:2,motivo:'Inscripción solicitada por estudiante'}});assert.equal(inscrito.status,201);assert.equal(inscrito.data.inscripcion.tipo_inscripcion,'ADMIN_UNIDAD');
+  assert.equal((await peticion(ruta,{...opciones,method:'POST',body:{id_estudiante:2,motivo:'Solicitud duplicada de inscripción'}})).status,409);
+  assert.equal((await peticion(ruta,{...opciones,method:'POST',body:{id_estudiante:3,motivo:'Solicitud por último cupo disponible'}})).status,409);
+  const audit=(await db.query("SELECT detalle FROM auditoria_academica WHERE accion='INSCRIPCION_ADMIN_UNIDAD' ORDER BY id_auditoria DESC LIMIT 1")).rows[0].detalle;assert.equal(audit.id_estudiante,2);assert.equal(audit.motivo,'Inscripción solicitada por estudiante');
+  assert.equal((await peticion(`/unidad/cursos/${curso}`,{...opciones,method:'PATCH',body:{cupo_maximo:2,estado:'INACTIVO',version:1}})).status,409);
+});
+
+test('Unidad: horarios, cupos y asignaciones conservan historial y revocan acceso',async()=>{
+  const opciones={id:3,roles:['ADMIN_UNIDAD']};
+  assert.equal((await peticion(`/unidad/cursos/${cursoUnidadId}/horarios`,{...opciones,method:'PUT',body:{version:1,horarios:[{dia_semana:'Jueves',hora_inicio:'10:00',hora_fin:'11:00',sala:'D-1'}]}})).status,200);
+  assert.equal((await peticion(`/unidad/cursos/${cursoUnidadId}`,{...opciones,method:'PATCH',body:{version:1,cupo_maximo:5,estado:'ACTIVO'}})).status,409);
+  assert.equal((await peticion(`/unidad/cursos/${cursoUnidadId}/docentes/1`,{...opciones,method:'PUT',body:{motivo:'Asignación docente del semestre'}})).status,200);
+  assert.equal((await peticion(`/unidad/cursos/${cursoUnidadId}/horarios`,{...opciones,method:'PUT',body:{version:2,horarios:[]}})).status,409);
+  assert.equal((await peticion('/unidad/cursos/1/docentes/1',{...opciones,method:'DELETE',body:{motivo:'Reorganización de carga docente'}})).status,200);
+  assert.equal((await peticion('/docente/cursos/1/estudiantes',{id:10,roles:['DOCENTE']})).status,403);
+  const asignacion=(await db.query('SELECT activa FROM curso_docente WHERE id_curso=1 AND id_docente=1')).rows[0];assert.equal(asignacion.activa,false);
+  assert.ok((await db.query('SELECT count(*)::int AS n FROM encuesta_docente')).rows[0].n>0);
+});
+
+test('Unidad: restricciones propias, levantamiento y seguimiento estudiantil',async()=>{
+  const opciones={id:3,roles:['ADMIN_UNIDAD']};
+  assert.equal((await peticion('/unidad/restricciones',{...opciones,method:'POST',body:{id_estudiante:4,tipo:'Administrativa',descripcion:'Restricción ajena a la unidad'}})).status,403);
+  const r=await peticion('/unidad/restricciones',{...opciones,method:'POST',body:{id_estudiante:3,tipo:'Administrativa',descripcion:'Pendiente revisión documental'}});assert.equal(r.status,201);
+  const restriccion=r.data.restriccion;
+  assert.equal((await peticion(`/unidad/cursos/${cursoUnidadId}/inscripciones`,{...opciones,method:'POST',body:{id_estudiante:3,motivo:'Solicitud de inscripción manual'}})).status,409);
+  const s=await peticion('/solicitudes',{id:5,method:'POST',body:{id_restriccion:restriccion.id_restriccion,motivo:'Ya presenté la documentación requerida'}});assert.equal(s.status,201);
+  const ruta=`/unidad/restricciones/${restriccion.id_restriccion}/levantar`;
+  assert.equal((await peticion(ruta,{id:4,roles:['ADMIN_UNIDAD'],method:'PATCH',body:{version:1,motivo:'Revisión por otra unidad'}})).status,403);
+  assert.equal((await peticion(ruta,{...opciones,method:'PATCH',body:{version:1,motivo:'Documentación revisada y aceptada'}})).status,200);
+  const estado=(await peticion('/solicitudes',{id:5})).data.solicitudes.find(s=>s.id_restriccion===restriccion.id_restriccion);assert.equal(estado.estado,'APROBADA');
+  assert.equal((await peticion(ruta,{...opciones,method:'PATCH',body:{version:1,motivo:'Repetición de una operación'}})).status,409);
+  const gateway=await fetch(`${base}/api/academico/unidad/cursos?periodo=1`,{headers:{Authorization:`Bearer ${token(3,['ADMIN_UNIDAD'])}`}});assert.equal(gateway.status,200);
 });

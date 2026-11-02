@@ -18,6 +18,10 @@ import { Encuestas } from './pages/Encuestas'
 import { Certificados } from './pages/Certificados'
 import { CursosDocente } from './pages/docente/CursosDocente'
 import { CursoDocente } from './pages/docente/CursoDocente'
+import { CursosUnidad } from './pages/unidad/CursosUnidad'
+import { CursoUnidad } from './pages/unidad/CursoUnidad'
+import { RestriccionesUnidad } from './pages/unidad/RestriccionesUnidad'
+import { SolicitudesUnidad } from './pages/unidad/SolicitudesUnidad'
 
 export default function App() {
   return (
@@ -52,6 +56,15 @@ export default function App() {
             </Route>
           </Route>
 
+          <Route element={<ProtectedRoute roles={['ADMIN_UNIDAD']} />}>
+            <Route element={<Layout/>}>
+              <Route path="/unidad" element={<CursosUnidad/>}/>
+              <Route path="/unidad/cursos/:idCurso" element={<CursoUnidad/>}/>
+              <Route path="/unidad/restricciones" element={<RestriccionesUnidad/>}/>
+              <Route path="/unidad/solicitudes" element={<SolicitudesUnidad/>}/>
+              <Route path="/unidad/perfil" element={<MiPerfil unidad/>}/>
+            </Route>
+          </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
