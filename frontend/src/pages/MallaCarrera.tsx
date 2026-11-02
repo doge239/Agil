@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getMalla } from '../api/catalogo'
 import { Badge } from '../components/Badge'
@@ -14,7 +14,8 @@ export function MallaCarrera() {
   const { idCarrera } = useParams<{ idCarrera: string }>()
   const id = Number(idCarrera)
 
-  const { data, loading, error, refetch } = useFetch(() => getMalla(id), [id])
+  const [plan,setPlan]=useState<number | undefined>()
+  const { data, loading, error, refetch } = useFetch(() => getMalla(id,plan), [id,plan])
 
   const grupos = useMemo(() => {
     const mapa = new Map<number, MallaItem[]>()
@@ -54,6 +55,11 @@ export function MallaCarrera() {
         />
       </div>
 
+      <label className="mb-4 flex items-center gap-3">Plan de estudios
+        <select className="rounded-lg border border-border bg-surface p-2" value={data?.plan.id_plan??''} onChange={e=>setPlan(Number(e.target.value))}>
+          {data?.planes.map(p=><option key={p.id_plan} value={p.id_plan}>{p.nombre}</option>)}
+        </select>
+      </label>
       {malla.length === 0 ? (
         <EmptyState mensaje="Esta carrera no tiene malla registrada." />
       ) : (

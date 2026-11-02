@@ -28,6 +28,7 @@ export interface Perfil {
   numero_matricula: string | null
   id_carrera: number | null
   anio_ingreso: number | null
+  id_plan: number | null
 }
 
 export interface PerfilResponse {
@@ -75,6 +76,9 @@ export interface MallaItem {
 
 export interface MallaResponse {
   malla: MallaItem[]
+  planes: Plan[]
+  plan: Plan
+  prerrequisitos: {id_asignatura:number;id_asignatura_requisito:number}[]
 }
 
 export interface AsignaturaInscrita {
@@ -110,14 +114,17 @@ export interface NotaItem {
   id_evaluacion: number
   evaluacion: string
   porcentaje: string
-  nota: string
+  nota: string | null
+  seccion: number
 }
 
 export interface NotasResponse {
   notas: NotaItem[]
+  finales: {id_curso:number;id_asignatura:number;seccion:number;nota:string;nota_minima:string}[]
 }
 
 export interface AsistenciaItem {
+  id_clase: number
   id_curso: number
   id_asignatura: number
   fecha: string
@@ -130,3 +137,12 @@ export interface AsistenciaItem {
 export interface AsistenciaResponse {
   asistencia: AsistenciaItem[]
 }
+
+export interface Plan { id_plan:number; id_carrera:number; nombre:string; anio_inicio:number; estado:string }
+export interface OfertaCurso extends AsignaturaInscrita {
+  cupos_disponibles:number; inscrito:boolean; inscripcion_abierta:boolean; horarios:HorarioItem[]
+}
+export interface Restriccion { id_restriccion:number; tipo:string; descripcion:string|null; activa:boolean }
+export interface Solicitud { id_solicitud:number; id_restriccion:number; tipo:string; motivo:string; estado:string; fecha_creacion:string; resolucion:string|null; fecha_resolucion:string|null }
+export interface Encuesta { id_encuesta:number; titulo:string; nombre:string; id_docente:number; fecha_fin:string; respondida:boolean; disponible:boolean; preguntas:{id_pregunta:number;texto:string;orden:number}[] }
+export interface Avance { plan:Plan; creditos_totales:number; creditos_aprobados:number; porcentaje:number; asignaturas:(MallaItem & {estado:string})[] }

@@ -11,6 +11,11 @@ import { MallaCarrera } from './pages/MallaCarrera'
 import { MiPerfil } from './pages/MiPerfil'
 import { MisAsignaturas } from './pages/MisAsignaturas'
 import { Notas } from './pages/Notas'
+import { Inscripcion } from './pages/Inscripcion'
+import { Solicitudes } from './pages/Solicitudes'
+import { AvanceCurricular } from './pages/AvanceCurricular'
+import { Encuestas } from './pages/Encuestas'
+import { Certificados } from './pages/Certificados'
 
 export default function App() {
   return (
@@ -24,6 +29,11 @@ export default function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/perfil" element={<MiPerfil />} />
               <Route path="/asignaturas" element={<MisAsignaturas />} />
+              <Route path="/inscripcion" element={<Inscripcion />} />
+              <Route path="/solicitudes" element={<Solicitudes />} />
+              <Route path="/avance" element={<AvanceCurricular />} />
+              <Route path="/encuestas" element={<Encuestas />} />
+              <Route path="/certificados" element={<Certificados />} />
               <Route path="/horario" element={<Horario />} />
               <Route path="/notas" element={<Notas />} />
               <Route path="/asistencia" element={<Asistencia />} />

@@ -5,6 +5,11 @@ import { useAuth } from '../context/AuthContext'
 import { useFetch } from '../hooks/useFetch'
 
 const accesos = [
+  { to:'/inscripcion',titulo:'Inscripción',descripcion:'Oferta de cursos y cupos disponibles' },
+  { to:'/solicitudes',titulo:'Solicitudes',descripcion:'Restricciones y seguimiento de levantamientos' },
+  { to:'/avance',titulo:'Avance curricular',descripcion:'Progreso acumulado en tu plan de estudios' },
+  { to:'/encuestas',titulo:'Encuesta docente',descripcion:'Evalúa la docencia de tus cursos' },
+  { to:'/certificados',titulo:'Certificados',descripcion:'Documentos académicos de demostración' },
   { to: '/perfil', titulo: 'Mi perfil', descripcion: 'Datos personales y académicos' },
   { to: '/asignaturas', titulo: 'Mis asignaturas', descripcion: 'Ramos inscritos este semestre' },
   { to: '/horario', titulo: 'Horario', descripcion: 'Bloques, días y salas de clases' },

@@ -14,23 +14,28 @@ export function useFetch<T>(fetcher: () => Promise<T>, deps: unknown[] = []): Us
   const [error, setError] = useState<string | null>(null)
 
   const fetcherRef = useRef(fetcher)
+  const secuencia = useRef(0)
   fetcherRef.current = fetcher
 
   const run = useCallback(async () => {
+    const actual=++secuencia.current
     setLoading(true)
     setError(null)
     try {
       const result = await fetcherRef.current()
-      setData(result)
+      if(actual===secuencia.current) setData(result)
     } catch (err) {
-      setError(getErrorMessage(err))
+      if(actual===secuencia.current) setError(getErrorMessage(err))
     } finally {
-      setLoading(false)
+      if(actual===secuencia.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
     void run()
+    // Este ref es un contador de peticiones, no un nodo del DOM.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { secuencia.current++ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 

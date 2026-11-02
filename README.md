@@ -3,6 +3,9 @@
 Backend de microservicios y frontend del portal del estudiante (rol **ESTUDIANTE**) para el
 sistema académico Banner-2 de la Universidad Católica del Norte.
 
+El alcance ampliado de Estudiante, las migraciones sin reinicialización y las reglas de desarrollo
+están documentados en [docs/ESTUDIANTE.md](docs/ESTUDIANTE.md).
+
 ## Arquitectura
 
 ```

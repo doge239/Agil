@@ -1,4 +1,5 @@
 import { getAsignaturas } from '../api/academico'
+import { usePeriodo } from '../context/periodo'
 import { DataTable } from '../components/DataTable'
 import type { Column } from '../components/DataTable'
 import { EmptyState } from '../components/EmptyState'
@@ -9,7 +10,8 @@ import { useFetch } from '../hooks/useFetch'
 import type { AsignaturaInscrita } from '../types/api'
 
 export function MisAsignaturas() {
-  const { data, loading, error, refetch } = useFetch(() => getAsignaturas(), [])
+  const periodo=usePeriodo()
+  const { data, loading, error, refetch } = useFetch(() => getAsignaturas(periodo), [periodo])
 
   if (loading) {
     return (

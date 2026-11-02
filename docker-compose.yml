@@ -40,6 +40,7 @@ services:
     volumes:
       - usuarios_data:/var/lib/postgresql/data
       - ./databases/usuarios/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./databases/migrations/usuarios/001_estudiante.sql:/docker-entrypoint-initdb.d/zz_001_estudiante.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -90,6 +91,8 @@ services:
     volumes:
       - academico_data:/var/lib/postgresql/data
       - ./databases/academico/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./databases/migrations/academico/001_estudiante.sql:/docker-entrypoint-initdb.d/zz_001_estudiante.sql:ro
+      - ./databases/migrations/academico/002_asignacion_familiar.sql:/docker-entrypoint-initdb.d/zz_002_asignacion_familiar.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]

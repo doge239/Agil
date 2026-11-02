@@ -11,7 +11,7 @@ export async function getAsignaturas(): Promise<AsignaturasResponse> {
   return data
 }
 
-export async function getMalla(idCarrera: number): Promise<MallaResponse> {
-  const { data } = await api.get<MallaResponse>(`/catalogo/carreras/${idCarrera}/malla`)
+export async function getMalla(idCarrera: number, plan?:number): Promise<MallaResponse> {
+  const { data } = await api.get<MallaResponse>(`/catalogo/carreras/${idCarrera}/malla`,{params:{plan}})
   return data
 }

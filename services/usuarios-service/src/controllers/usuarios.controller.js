@@ -18,10 +18,15 @@ async function obtenerMiPerfil(req, res) {
         e.id_estudiante,
         e.numero_matricula,
         e.id_carrera,
-        e.anio_ingreso
+        e.anio_ingreso,
+        e.id_plan,
+        d.id_docente,
+        au.id_unidad AS id_unidad_admin
       FROM persona p
       LEFT JOIN estudiante e
         ON e.id_persona = p.id_persona
+      LEFT JOIN docente d ON d.id_persona = p.id_persona
+      LEFT JOIN administrador_unidad au ON au.id_persona = p.id_persona
       WHERE p.id_usuario = $1
       `,
       [idUsuario]
