@@ -11,4 +11,5 @@ router.get(
   usuariosController.obtenerMiPerfil
 );
 
+router.get('/docente/cursos/:idCurso/estudiantes',verificarToken,usuariosController.obtenerEstudiantesDocente);
 module.exports = router;

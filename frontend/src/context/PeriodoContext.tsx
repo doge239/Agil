@@ -5,9 +5,12 @@ import api from '../api/axios'
 import { useFetch } from '../hooks/useFetch'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { Spinner } from '../components/Spinner'
+import { useLocation } from 'react-router-dom'
 export interface Periodo { id_periodo:number; anio:number; semestre:number; estado:string; vigente:boolean; inscripcion_abierta:boolean }
 export function PeriodoProvider({children}:{children:ReactNode}) {
-  const {data,loading,error,refetch}=useFetch(async()=> (await api.get<{periodos:Periodo[]}>('/academico/periodos')).data,[])
+  const esDocente=useLocation().pathname.startsWith('/docente')
+  const ruta=esDocente?'/academico/docente/periodos':'/academico/periodos'
+  const {data,loading,error,refetch}=useFetch(async()=> (await api.get<{periodos:Periodo[]}>(ruta)).data,[ruta])
   const [seleccion,setSeleccion]=useState<number | undefined>()
   const periodos=data?.periodos??[]
   const id=periodos.some(p=>p.id_periodo===seleccion)?seleccion:(periodos.find(p=>p.vigente)??periodos[0])?.id_periodo

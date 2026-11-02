@@ -29,6 +29,8 @@ export interface Perfil {
   id_carrera: number | null
   anio_ingreso: number | null
   id_plan: number | null
+  id_docente: number | null
+  id_unidad_docente: number | null
 }
 
 export interface PerfilResponse {

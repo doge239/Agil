@@ -1,0 +1,10 @@
+BEGIN;
+ALTER TABLE evaluacion ADD COLUMN version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0);
+ALTER TABLE calificacion ADD COLUMN version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0);
+ALTER TABLE asistencia ADD COLUMN version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0);
+ALTER TABLE clase ADD COLUMN id_docente_creacion INTEGER;
+CREATE INDEX curso_docente_docente_idx ON curso_docente(id_docente);
+CREATE INDEX evaluacion_curso_idx ON evaluacion(id_curso);
+CREATE INDEX clase_curso_fecha_idx ON clase(id_curso,fecha);
+INSERT INTO schema_migration(version) VALUES ('003_docente');
+COMMIT;

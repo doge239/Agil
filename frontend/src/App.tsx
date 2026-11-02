@@ -16,6 +16,8 @@ import { Solicitudes } from './pages/Solicitudes'
 import { AvanceCurricular } from './pages/AvanceCurricular'
 import { Encuestas } from './pages/Encuestas'
 import { Certificados } from './pages/Certificados'
+import { CursosDocente } from './pages/docente/CursosDocente'
+import { CursoDocente } from './pages/docente/CursoDocente'
 
 export default function App() {
   return (
@@ -24,7 +26,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
 
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute roles={['ESTUDIANTE']} />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/perfil" element={<MiPerfil />} />
@@ -39,6 +41,14 @@ export default function App() {
               <Route path="/asistencia" element={<Asistencia />} />
               <Route path="/carreras" element={<Carreras />} />
               <Route path="/carreras/:idCarrera" element={<MallaCarrera />} />
+            </Route>
+          </Route>
+
+          <Route element={<ProtectedRoute roles={['DOCENTE']} />}>
+            <Route element={<Layout />}>
+              <Route path="/docente" element={<CursosDocente/>}/>
+              <Route path="/docente/perfil" element={<MiPerfil docente/>}/>
+              <Route path="/docente/cursos/:idCurso" element={<CursoDocente/>}/>
             </Route>
           </Route>
 

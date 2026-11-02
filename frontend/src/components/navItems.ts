@@ -17,3 +17,7 @@ export const navItems: NavItem[] = [
   { to: '/certificados', label: 'Certificados' },
   { to: '/carreras', label: 'Carreras' },
 ]
+export const docenteNavItems: NavItem[] = [
+  {to:'/docente',label:'Mis cursos'},
+  {to:'/docente/perfil',label:'Mi perfil'},
+]

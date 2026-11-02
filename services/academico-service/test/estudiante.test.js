@@ -29,6 +29,7 @@ before(async()=> {
     await pg.exec(fs.readFileSync(path.join(root,'databases',nombre,'init.sql'),'utf8'));
     if(nombre!=='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations',nombre,'001_estudiante.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/002_asignacion_familiar.sql'),'utf8'));
+    if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/003_docente.sql'),'utf8'));
   }
   await usuarios.exec(`INSERT INTO persona(id_usuario,nombres,apellido_paterno,correo_institucional) VALUES(2,'Otro','Estudiante','otro@test'),(3,'Admin','Unidad','admin@test'),(4,'Admin','Otra','otra@test');
     INSERT INTO estudiante(id_persona,numero_matricula,id_carrera,id_plan) VALUES(2,'OTRO',1,1);
@@ -186,4 +187,83 @@ test('solo Administración General habilita inscripción y los cierres se respet
   assert.equal((await peticion(ruta,{id:3,roles:['ADMIN_UNIDAD'],method:'PATCH',body})).status,403);
   assert.equal((await peticion(ruta,{id:3,roles:['ADMIN_GENERAL'],method:'PATCH',body})).status,200);
   assert.equal((await peticion('/inscripciones',{id:5,method:'POST',body:{id_curso:6}})).status,409);
+});
+
+test('Docente: identidad, nómina y pertenencia también se validan en Usuarios',async()=> {
+  await usuarios.exec(`INSERT INTO persona(id_persona,id_usuario,nombres,apellido_paterno,correo_institucional) VALUES
+    (10,10,'Profesora','Prueba','docente@test'),(11,11,'Otro','Profesor','docente2@test');
+    INSERT INTO docente(id_persona,id_unidad) VALUES(10,1),(11,1);`);
+  await db.exec('INSERT INTO curso_docente(id_curso,id_docente) VALUES(2,1),(3,2)');
+  const p=await peticion('/docente/cursos?periodo=1',{id:10,roles:['DOCENTE']});
+  assert.equal(p.status,200);assert.deepEqual(p.data.cursos.map(c=>c.id_curso),[1,2]);
+  assert.equal((await peticion('/docente/cursos',{id:1})).status,403);
+  assert.equal((await peticion('/docente/cursos',{id:3,roles:['DOCENTE']})).status,403);
+  assert.equal((await peticion('/docente/cursos/3/estudiantes',{id:10,roles:['DOCENTE']})).status,403);
+  const nomina=await peticion('/docente/cursos/2/estudiantes',{id:10,roles:['DOCENTE']});
+  assert.equal(nomina.status,200);assert.equal(nomina.data.estudiantes.length,1);assert.equal(nomina.data.estudiantes[0].nombres,'Enzo');
+  assert.equal(nomina.data.estudiantes[0].telefono,undefined);
+  const r=await fetch(`${base}/usuarios/docente/cursos/3/estudiantes`,{headers:{Authorization:`Bearer ${token(10,['DOCENTE'])}`}});assert.equal(r.status,403);
+  assert.equal((await peticion('/docente/cursos/2/estudiantes',{id:10,roles:['DOCENTE'],autorizado:false})).status,401);
+});
+
+test('Docente: evaluaciones validan suma, pertenencia, cierre y versión',async()=> {
+  const opciones={id:10,roles:['DOCENTE']};
+  const cuerpo={nombre:'Prueba docente',porcentaje:20,fecha:null};
+  const creada=await peticion('/docente/cursos/2/evaluaciones',{...opciones,method:'POST',body:cuerpo});assert.equal(creada.status,201);
+  const id=creada.data.evaluacion.id_evaluacion;
+  assert.equal((await peticion('/docente/cursos/2/evaluaciones',{...opciones,method:'POST',body:{...cuerpo,porcentaje:80}})).status,409);
+  assert.equal((await peticion('/docente/cursos/3/evaluaciones',{...opciones,method:'POST',body:cuerpo})).status,403);
+  assert.equal((await peticion('/docente/cursos/2/evaluaciones/1',{...opciones,method:'PATCH',body:{...cuerpo,version:1}})).status,404);
+  assert.equal((await peticion(`/docente/cursos/2/evaluaciones/${id}`,{...opciones,method:'PATCH',body:{...cuerpo,nombre:'Prueba corregida',version:1}})).status,200);
+  assert.equal((await peticion(`/docente/cursos/2/evaluaciones/${id}`,{...opciones,method:'PATCH',body:{...cuerpo,version:1}})).status,409);
+  assert.equal((await peticion('/docente/cursos/1/evaluaciones/1',{...opciones,method:'PATCH',body:{...cuerpo,version:1}})).status,409);
+});
+
+test('Docente: notas son atómicas, visibles al estudiante y auditadas',async()=> {
+  const opciones={id:10,roles:['DOCENTE']},ruta='/docente/cursos/2/evaluaciones/2/notas';
+  assert.equal((await peticion('/docente/cursos/2/evaluaciones/1/notas',opciones)).status,404);
+  assert.equal((await peticion('/docente/cursos/3/evaluaciones/2/notas',opciones)).status,403);
+  const actuales=await peticion(ruta,opciones);assert.equal(actuales.data.notas[0].nota,'6.0');
+  const guardar=notas=>peticion(ruta,{...opciones,method:'PUT',body:{notas}});
+  assert.equal((await guardar([{id_estudiante:1,nota:8,version:1}])).status,400);
+  assert.equal((await guardar([{id_estudiante:'1',nota:5,version:1}])).status,400);
+  assert.equal((await guardar([{id_estudiante:1,nota:5.5,version:1},{id_estudiante:2,nota:4,version:0}])).status,409);
+  assert.equal((await peticion(ruta,opciones)).data.notas[0].nota,'6.0');
+  assert.equal((await guardar([{id_estudiante:1,nota:5.5,version:1}])).status,200);
+  assert.equal((await guardar([{id_estudiante:1,nota:6,version:1}])).status,409);
+  const estudiante=await peticion('/notas?periodo=1');assert.equal(estudiante.data.notas.find(n=>n.id_evaluacion===2).nota,'5.5');
+  const historial=await peticion('/docente/cursos/2/historial',opciones);
+  const h=historial.data.historial.find(h=>h.accion==='DOCENTE_NOTA');assert.equal(h.detalle.anterior.nota,'6.0');assert.equal(h.detalle.nuevo,5.5);
+  assert.equal((await peticion('/docente/cursos/1/evaluaciones/1/notas',{...opciones,method:'PUT',body:{notas:[{id_estudiante:1,nota:6,version:1}]}})).status,409);
+});
+
+test('Docente: clases y asistencia validan fecha, inscritos, versión y auditoría',async()=> {
+  const opciones={id:10,roles:['DOCENTE']};
+  const fecha=(await db.query('SELECT CURRENT_DATE::text AS fecha')).rows[0].fecha;
+  const creada=await peticion('/docente/cursos/2/clases',{...opciones,method:'POST',body:{fecha,hora_inicio:'10:00',hora_fin:'11:00'}});assert.equal(creada.status,201);
+  const id=creada.data.clase.id_clase,ruta=`/docente/cursos/2/clases/${id}/asistencias`;
+  assert.equal((await peticion('/docente/cursos/2/clases',{...opciones,method:'POST',body:{fecha,hora_inicio:'10:00',hora_fin:'11:00'}})).status,409);
+  assert.equal((await peticion('/docente/cursos/2/clases',{...opciones,method:'POST',body:{fecha:'2026-02-30',hora_inicio:'11:00',hora_fin:'10:00'}})).status,400);
+  const nomina=await peticion(ruta,opciones);assert.equal(nomina.data.asistencias[0].estado,null);
+  const guardar=asistencias=>peticion(ruta,{...opciones,method:'PUT',body:{asistencias}});
+  assert.equal((await guardar([{id_estudiante:2,estado:'PRESENTE',version:0}])).status,409);
+  assert.equal((await guardar([{id_estudiante:1,estado:'CUALQUIERA',version:0}])).status,400);
+  assert.equal((await guardar([{id_estudiante:1,estado:'PRESENTE',observacion:'A tiempo',version:0}])).status,200);
+  assert.equal((await guardar([{id_estudiante:1,estado:'AUSENTE',version:0}])).status,409);
+  assert.equal((await guardar([{id_estudiante:1,estado:'JUSTIFICADO',observacion:'Documento presentado',version:1}])).status,200);
+  assert.equal((await peticion(`/docente/cursos/1/clases/${id}/asistencias`,opciones)).status,404);
+  assert.equal((await peticion(`/docente/cursos/3/clases/${id}/asistencias`,opciones)).status,403);
+  const estudiante=await peticion('/asistencia?periodo=1');assert.equal(estudiante.data.asistencia.find(a=>a.id_clase===id).estado,'JUSTIFICADO');
+  const futuras=(await db.query('SELECT (CURRENT_DATE+1)::text AS fecha')).rows[0].fecha;
+  const futura=await peticion('/docente/cursos/2/clases',{...opciones,method:'POST',body:{fecha:futuras,hora_inicio:'10:00',hora_fin:'11:00'}});
+  assert.equal((await peticion(`/docente/cursos/2/clases/${futura.data.clase.id_clase}/asistencias`,{...opciones,method:'PUT',body:{asistencias:[{id_estudiante:1,estado:'PRESENTE',version:0}]}})).status,409);
+});
+
+test('Docente: gateway y períodos cerrados conservan la separación de permisos',async()=> {
+  const headers={Authorization:`Bearer ${token(10,['DOCENTE'])}`};
+  const r=await fetch(`${base}/api/academico/docente/cursos/2/estudiantes`,{headers});assert.equal(r.status,200);
+  assert.equal((await peticion('/docente/periodos',{id:10,roles:['DOCENTE']})).status,200);
+  await db.exec("UPDATE periodo_academico SET estado='CERRADO' WHERE id_periodo=1");
+  assert.equal((await peticion('/docente/cursos/2/evaluaciones',{id:10,roles:['DOCENTE'],method:'POST',body:{nombre:'Fuera de plazo',porcentaje:5,fecha:null}})).status,409);
+  assert.equal((await peticion('/docente/cursos/2/evaluaciones',{id:10,roles:['DOCENTE']})).status,200);
 });

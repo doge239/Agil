@@ -156,6 +156,12 @@ app.patch('/api/academico/administracion/periodos/:idPeriodo/inscripcion',(req,r
 app.put('/api/academico/administracion/inscripciones/:idInscripcion/resultado',(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 
 const PORT = process.env.PORT || 4000;
+for(const [metodo,rutas] of Object.entries({
+  get:['periodos','cursos','cursos/:idCurso/estudiantes','cursos/:idCurso/evaluaciones','cursos/:idCurso/evaluaciones/:idEvaluacion/notas','cursos/:idCurso/clases','cursos/:idCurso/clases/:idClase/asistencias','cursos/:idCurso/historial'],
+  post:['cursos/:idCurso/evaluaciones','cursos/:idCurso/clases'],
+  patch:['cursos/:idCurso/evaluaciones/:idEvaluacion'],
+  put:['cursos/:idCurso/evaluaciones/:idEvaluacion/notas','cursos/:idCurso/clases/:idClase/asistencias'],
+})) for(const ruta of rutas) app[metodo](`/api/academico/docente/${ruta}`,(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 
 if (require.main === module) app.listen(PORT, () => {
   console.log(`API Gateway ejecutándose en puerto ${PORT}`);

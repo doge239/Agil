@@ -1,0 +1,17 @@
+const router = require('express').Router();
+const c = require('../controllers/docente.controller');
+router.get('/periodos',c.periodos);
+router.get('/cursos',c.cursos);
+router.get('/cursos/:idCurso/inscripciones',c.inscripciones);
+router.get('/cursos/:idCurso/estudiantes',c.estudiantes);
+router.get('/cursos/:idCurso/evaluaciones',c.evaluaciones);
+router.post('/cursos/:idCurso/evaluaciones',c.guardarEvaluacion);
+router.patch('/cursos/:idCurso/evaluaciones/:idEvaluacion',c.guardarEvaluacion);
+router.get('/cursos/:idCurso/evaluaciones/:idEvaluacion/notas',c.notas);
+router.put('/cursos/:idCurso/evaluaciones/:idEvaluacion/notas',c.guardarNotas);
+router.get('/cursos/:idCurso/historial',c.historial);
+router.get('/cursos/:idCurso/clases',c.clases);
+router.post('/cursos/:idCurso/clases',c.crearClase);
+router.get('/cursos/:idCurso/clases/:idClase/asistencias',c.asistencias);
+router.put('/cursos/:idCurso/clases/:idClase/asistencias',c.guardarAsistencias);
+module.exports=router;

@@ -46,7 +46,7 @@ export function Login() {
           <LogoUcn className="h-14 w-14" />
           <div className="rounded-lg bg-surface px-4 py-2 text-center">
             <h1 className="text-xl font-bold text-text">Banner UCN</h1>
-            <p className="text-sm text-muted">Portal del estudiante</p>
+            <p className="text-sm text-muted">Portal académico · Estudiante y Docente</p>
           </div>
         </div>
 
