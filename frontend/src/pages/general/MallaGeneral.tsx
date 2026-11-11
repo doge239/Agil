@@ -9,7 +9,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { Input } from '../../components/Input'
 import { Button } from '../../components/Button'
 import { Badge } from '../../components/Badge'
-import { Spinner } from '../../components/Spinner'
+import { LoadingSkeleton } from '../../components/Skeleton'
 import { ErrorBanner } from '../../components/ErrorBanner'
 import { useOperacionUnidad } from '../unidad/operacion'
 import { ResultadoUnidad } from '../unidad/Compartidos'
@@ -61,6 +61,6 @@ export function MallaGeneral(){
   const error=malla.error||asignaturas.error
   return <div><PageHeader titulo="Mantención de malla curricular" descripcion={malla.data?.plan.nombre??'Plan de estudio'}/>
     {malla.data&&<div className="mb-4 flex flex-wrap items-center gap-3"><Badge estado={malla.data.plan.estado}/><Link className="text-primary underline" to={`/general/carreras/${malla.data.plan.id_carrera}/planes`}>Volver a los planes de la carrera</Link></div>}
-    {malla.loading||asignaturas.loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={()=>{malla.refetch();asignaturas.refetch()}}/>:malla.data&&<EditorMalla key={`${id}-${malla.data.plan.version}`} plan={malla.data.plan} inicial={malla.data.malla} asignaturas={asignaturas.data?.asignaturas??[]} refrescar={malla.refetch}/>}
+    {malla.loading||asignaturas.loading?<LoadingSkeleton />:error?<ErrorBanner mensaje={error} onRetry={()=>{malla.refetch();asignaturas.refetch()}}/>:malla.data&&<EditorMalla key={`${id}-${malla.data.plan.version}`} plan={malla.data.plan} inicial={malla.data.malla} asignaturas={asignaturas.data?.asignaturas??[]} refrescar={malla.refetch}/>}
   </div>
 }

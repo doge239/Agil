@@ -8,6 +8,7 @@ import { getHorario } from '../api/academico'
 import { usePeriodo } from '../context/periodo'
 import { useAuth } from '../context/AuthContext'
 import { useFetch } from '../hooks/useFetch'
+import { LoadingSkeleton } from '../components/Skeleton'
 
 const accesos = [
   { to:'/inscripcion',titulo:'Inscripción',descripcion:'Oferta de cursos y cupos disponibles' },
@@ -25,10 +26,12 @@ const accesos = [
 
 export function Dashboard() {
   const { usuario } = useAuth()
-  const { data } = useFetch(() => getMiPerfil(), [])
-  const { data: avance } = useFetch(getAvance, [])
+  const { data, loading: cargandoPerfil } = useFetch(() => getMiPerfil(), [])
+  const { data: avance, loading: cargandoAvance } = useFetch(getAvance, [])
   const periodo = usePeriodo()
-  const { data: horario } = useFetch(() => getHorario(periodo), [periodo])
+  const { data: horario, loading: cargandoHorario } = useFetch(() => getHorario(periodo), [periodo])
+
+  if (cargandoPerfil || cargandoAvance || cargandoHorario) return <LoadingSkeleton variante="tarjetas" cabecera />
 
   const nombre = data?.perfil.nombres ?? usuario?.correo ?? 'estudiante'
 

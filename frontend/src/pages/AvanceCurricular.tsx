@@ -5,7 +5,7 @@ import { getAvance } from '../api/estudiante'
 import { useFetch } from '../hooks/useFetch'
 import { PageHeader } from '../components/PageHeader'
 import { ErrorBanner } from '../components/ErrorBanner'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { Button } from '../components/Button'
 import { PortalIcon } from '../components/PortalIcon'
 import { MallaGrid } from '../components/MallaGrid'
@@ -42,7 +42,7 @@ export function AvanceCurricular() {
   }) ?? []
   return <div className="avance">
     <div className="avance-cabecera"><PageHeader titulo="Avance curricular" descripcion="Pasa el cursor por un ramo para resaltar sus relaciones. Haz clic o toca la asignatura para ver su detalle." />{data && <Button variante="secondary" onClick={() => setAmpliada(true)}><PortalIcon name="expand" />Ver malla completa</Button>}</div>
-    {loading ? <Spinner /> : error ? <ErrorBanner mensaje={error} onRetry={refetch} /> : data && <>
+    {loading ? <LoadingSkeleton variante="tarjetas" /> : error ? <ErrorBanner mensaje={error} onRetry={refetch} /> : data && <>
       <div className="avance-resumen">
         <section className="avance-plan"><span className="avance-eyebrow">CARRERA PROFESIONAL</span><h2>{data.asignaturas[0]?.carrera ?? data.plan.nombre}</h2><p>{data.plan.nombre}</p></section>
         <section className="avance-progreso" aria-label="Progreso de la carrera">

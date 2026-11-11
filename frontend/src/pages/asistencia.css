@@ -40,7 +40,6 @@
 .asistencia-detalle dt { margin-bottom: 5px; font-size: 11px; color: var(--text-secondary); }
 .asistencia-detalle dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
 .asistencia-observacion { flex: 1 1 250px; }
-.asistencia-instruccion { margin: 0; font-size: 12px; color: var(--text-secondary); }
 html[data-theme='dark'] .asistencia-grilla thead th { background: #102d4266; }
 html[data-theme='dark'] .asistencia-grilla { --asistencia-fondo-fijo: #102b3e; }
 html[data-theme='dark'] .asistencia-grilla thead tr > :first-child,

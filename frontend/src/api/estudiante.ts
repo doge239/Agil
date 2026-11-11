@@ -18,7 +18,8 @@ export async function descargar(tipo:string,periodo?:number) {
   try {
     const response=await api.get<Blob>(`/academico/certificados/${tipo}`,{params:{periodo},responseType:'blob'})
     const url=URL.createObjectURL(response.data)
-    const link=document.createElement('a'); link.href=url; link.download=`${tipo.toLowerCase()}-${periodo}.pdf`
+    const nombre=response.headers['content-disposition']?.match(/filename="([^"]+)"/)?.[1]
+    const link=document.createElement('a'); link.href=url; link.download=nombre??`${tipo.toLowerCase()}${periodo ? `-${periodo}` : ''}.pdf`
     document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000)
   } catch(error) {
     if (error && typeof error==='object' && 'response' in error) {

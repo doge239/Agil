@@ -7,7 +7,7 @@ import type { CursoUnidad as Curso,PersonaUnidad } from '../../api/unidad'
 import { useFetch } from '../../hooks/useFetch'
 import { PageHeader } from '../../components/PageHeader'
 import { ErrorBanner } from '../../components/ErrorBanner'
-import { Spinner } from '../../components/Spinner'
+import { LoadingSkeleton } from '../../components/Skeleton'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { BuscarEstudiante,ResultadoUnidad } from './Compartidos'
@@ -41,7 +41,7 @@ function InscripcionManual({curso:c,refrescar}:{curso:Curso;refrescar:()=>void})
 export function CursoUnidad(){
   const {idCurso}=useParams(),id=Number(idCurso)
   const {data,loading,error,refetch}=useFetch(async()=>{const datos=await getCursosUnidad();const curso=datos.cursos.find(c=>c.id_curso===id);if(!curso)throw new Error('El curso no pertenece a tu unidad');return {curso,docentes:datos.docentes}},[id])
-  if(loading)return <Spinner/>
+  if(loading)return <LoadingSkeleton />
   if(error)return <ErrorBanner mensaje={error} onRetry={refetch}/>
   if(!data)return null
   const {curso,docentes}=data

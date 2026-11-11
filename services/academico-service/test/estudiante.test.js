@@ -214,10 +214,13 @@ test('inscripción y calificaciones comparten formato y pie en todas las página
     const r=await peticion(`/certificados/${tipo}?periodo=1`);assert.equal(r.status,200);
     const texto=r.data.toString('latin1');
     assert.ok(texto.includes(titulo));assert.match(texto,/Departamento de Registro Curricular/);
-    assert.match(texto,/0.99 0.97 0.94 rg/);assert.match(texto,/18 18 576 756 re S/);
+    assert.match(texto,/0.09 0.18 0.29 rg/);assert.match(texto,/48 65 m 564 65 l S/);
     assert.match(texto,/SIN VALIDEZ INSTITUCIONAL/);assert.match(texto,/Referencia de emisión/);
-    assert.match(texto,/20\.000\.000-0/);assert.match(texto,/Sección/);
-    if(tipo==='CALIFICACIONES')assert.match(texto,/Resultado final/);
+    assert.match(texto,/20\.000\.000-0/);
+    if(tipo==='CALIFICACIONES') {
+      assert.match(texto,/Nota final/);assert.match(texto,/\/Count 1\b/);
+      assert.doesNotMatch(texto,/Sección|ACTIVA|FINALIZADA|evaluación parcial/);
+    } else assert.match(texto,/Sección/);
   }
   const pdf=crearCertificado({titulo:'REPORTE DE CALIFICACIONES',lineas:Array.from({length:40},(_,i)=>`Evaluación ${i}: 5.0`),referencia:'test',fecha:new Date('2026-11-02T12:00:00Z')}).toString('latin1');
   assert.match(pdf,/\/Count 3/);

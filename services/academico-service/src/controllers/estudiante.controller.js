@@ -3,7 +3,7 @@ const axios = require('axios');
 const { randomUUID } = require('node:crypto');
 const { exigir, idPositivo, texto, hayChoque, respuestasValidas } = require('../domain/estudiante');
 const { calcularAvance } = require('../domain/avance');
-const { crearCertificado, crearAsignacionFamiliar } = require('../domain/pdf');
+const { crearCertificado, crearReporteCalificaciones, crearAsignacionFamiliar } = require('../domain/pdf');
 async function remoto(req, servicio, ruta) {
   try { return (await axios.get(`${process.env[servicio]}${ruta}`, { headers:{Authorization:req.headers.authorization},timeout:8000 })).data; }
   catch(e) { const status=[401,403,404,409].includes(e.response?.status)?e.response.status:503; const error=new Error(e.response?.data?.mensaje||'No se pudo consultar usuarios o catálogo'); error.status=status; throw error; }
@@ -160,14 +160,13 @@ exports.responderEncuesta=estudiante(async(req,res,p)=> {
 exports.obtenerCertificados=estudiante(async(req,res)=>res.json({certificados:[{tipo:'INSCRIPCION',nombre:'Constancia de inscripción'},{tipo:'CALIFICACIONES',nombre:'Reporte de calificaciones'},{tipo:'ASIGNACION_FAMILIAR',nombre:'Certificado de asignación familiar'}],demostracion:true}));
 exports.descargarCertificado=estudiante(async(req,res,p)=> {
   const tipo=req.params.tipo; exigir(['INSCRIPCION','CALIFICACIONES','ASIGNACION_FAMILIAR'].includes(tipo),404,'Certificado no disponible'); const per=await periodo(req);
-  const filas=await pool.query(`SELECT c.id_curso,c.id_asignatura,c.seccion,i.estado,r.nota AS nota_final,
-    (SELECT json_agg(json_build_object('evaluacion',e.nombre,'nota',cal.nota,'porcentaje',e.porcentaje) ORDER BY e.fecha,e.id_evaluacion) FROM evaluacion e LEFT JOIN calificacion cal ON cal.id_evaluacion=e.id_evaluacion AND cal.id_estudiante=i.id_estudiante WHERE e.id_curso=c.id_curso) AS evaluaciones
+  const filas=await pool.query(`SELECT c.id_curso,c.id_asignatura,c.seccion,i.estado,r.nota AS nota_final
     FROM inscripcion i JOIN curso c USING(id_curso) LEFT JOIN resultado_final r USING(id_inscripcion)
     WHERE i.id_estudiante=$1 AND c.id_periodo=$2 AND i.estado IN ('ACTIVA','FINALIZADA') ORDER BY c.id_curso`,[p.id_estudiante,per.id_periodo]);
   exigir(filas.rowCount,409,'No hay inscripciones para emitir este documento en el período');
   const cursos=await enriquecer(req,filas.rows); const id=randomUUID();
   const lineas=[`Estudiante: ${p.nombres} ${p.apellido_paterno} ${p.apellido_materno||''}`,`R.U.T.: ${p.rut||'No registrado'}`,`Matrícula: ${p.numero_matricula}`,`Período: ${per.semestre}° semestre del año ${per.anio}`,''];
-  for(const c of cursos) { lineas.push(`${c.codigo||c.id_asignatura} - ${c.nombre||'Asignatura'} - Sección ${c.seccion} (${c.estado})`); if(tipo==='CALIFICACIONES') { lineas.push(`Resultado final: ${c.nota_final??'Pendiente'}`); for(const e of c.evaluaciones||[]) lineas.push(`  ${e.evaluacion}: ${e.nota??'Pendiente'} (${e.porcentaje}%) - evaluación parcial`); } }
+  if(tipo==='INSCRIPCION')for(const c of cursos) lineas.push(`${c.codigo||c.id_asignatura} - ${c.nombre||'Asignatura'} - Sección ${c.seccion} (${c.estado})`);
   let pdf;
   if(tipo==='ASIGNACION_FAMILIAR') {
     exigir(cursos.some(c=>c.estado==='ACTIVA'),409,'Se requiere una inscripción activa en el período para este certificado');
@@ -176,7 +175,8 @@ exports.descargarCertificado=estudiante(async(req,res,p)=> {
     const carrera=carreras.find(c=>c.id_carrera===p.id_carrera);
     exigir(carrera,409,'La carrera del estudiante no está disponible');
     pdf=crearAsignacionFamiliar({perfil:p,periodo:per,carrera:carrera.nombre,referencia:id});
-  } else pdf=crearCertificado({titulo:tipo==='INSCRIPCION'?'CONSTANCIA DE INSCRIPCIÓN':'REPORTE DE CALIFICACIONES',lineas,referencia:id});
+  } else if(tipo==='CALIFICACIONES')pdf=crearReporteCalificaciones({lineas,cursos,referencia:id});
+  else pdf=crearCertificado({titulo:'CONSTANCIA DE INSCRIPCIÓN',lineas,referencia:id});
   await pool.query('INSERT INTO emision_certificado(id_emision,id_estudiante,tipo,id_periodo) VALUES($1,$2,$3,$4)',[id,p.id_estudiante,tipo,per.id_periodo]);
   res.set({'Content-Type':'application/pdf','Content-Disposition':`attachment; filename="${tipo.toLowerCase()}-${per.anio}-${per.semestre}.pdf"`,'Cache-Control':'no-store'}).send(pdf);
 });

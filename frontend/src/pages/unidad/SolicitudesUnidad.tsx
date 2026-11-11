@@ -5,7 +5,7 @@ import type { Solicitud } from '../../types/api'
 import { useFetch } from '../../hooks/useFetch'
 import { PageHeader } from '../../components/PageHeader'
 import { ErrorBanner } from '../../components/ErrorBanner'
-import { Spinner } from '../../components/Spinner'
+import { LoadingSkeleton } from '../../components/Skeleton'
 import { EmptyState } from '../../components/EmptyState'
 import { Badge } from '../../components/Badge'
 import { Input } from '../../components/Input'
@@ -20,5 +20,5 @@ function Resolucion({s,refrescar}:{s:Solicitud;refrescar:()=>void}){
 }
 export function SolicitudesUnidad({general=false}:{general?:boolean}){
   const {data,loading,error,refetch}=useFetch(getSolicitudesUnidad,[])
-  return <div><PageHeader titulo="Solicitudes de levantamiento" descripcion={general?"Resuelve solicitudes globales y de todas las unidades. No puedes resolver tus propias solicitudes.":"Resuelve solicitudes correspondientes a restricciones de tu unidad."}/>{loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.solicitudes.length?<EmptyState mensaje={general?"No hay solicitudes registradas.":"No hay solicitudes de tu unidad."}/>:data.solicitudes.map(s=><article key={s.id_solicitud} className="mb-4 rounded-xl bg-surface p-4"><Badge estado={s.estado}/><h2 className="mt-2 font-semibold">Solicitud #{s.id_solicitud} · {s.tipo} · Estudiante #{s.id_estudiante}</h2><p className="my-2 text-sm text-muted">{formatFecha(s.fecha_creacion)}</p><p className="whitespace-pre-wrap">{s.motivo}</p>{s.estado==='PENDIENTE'?<Resolucion s={s} refrescar={refetch}/>:<p className="mt-3 whitespace-pre-wrap">Resolución: {s.resolucion}</p>}</article>)}</div>
+  return <div><PageHeader titulo="Solicitudes de levantamiento" descripcion={general?"Resuelve solicitudes globales y de todas las unidades. No puedes resolver tus propias solicitudes.":"Resuelve solicitudes correspondientes a restricciones de tu unidad."}/>{loading?<LoadingSkeleton />:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.solicitudes.length?<EmptyState mensaje={general?"No hay solicitudes registradas.":"No hay solicitudes de tu unidad."}/>:data.solicitudes.map(s=><article key={s.id_solicitud} className="mb-4 rounded-xl bg-surface p-4"><Badge estado={s.estado}/><h2 className="mt-2 font-semibold">Solicitud #{s.id_solicitud} · {s.tipo} · Estudiante #{s.id_estudiante}</h2><p className="my-2 text-sm text-muted">{formatFecha(s.fecha_creacion)}</p><p className="whitespace-pre-wrap">{s.motivo}</p>{s.estado==='PENDIENTE'?<Resolucion s={s} refrescar={refetch}/>:<p className="mt-3 whitespace-pre-wrap">Resolución: {s.resolucion}</p>}</article>)}</div>
 }

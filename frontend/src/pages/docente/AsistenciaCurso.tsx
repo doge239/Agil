@@ -8,7 +8,7 @@ import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { EmptyState } from '../../components/EmptyState'
 import { ErrorBanner } from '../../components/ErrorBanner'
-import { Spinner } from '../../components/Spinner'
+import { LoadingSkeleton } from '../../components/Skeleton'
 import { useFetch } from '../../hooks/useFetch'
 import { estadoAsistencia, estadosAsistencia, resumirAsistencia } from '../../utils/asistencia'
 import { formatFecha, formatHora } from '../../utils/format'
@@ -100,7 +100,7 @@ export function AsistenciaCurso({curso,estudiantes,bloqueado,horarios}:{curso:nu
       </div>
     </section>}
     {eliminacion&&<EliminarClase clase={eliminacion} ocupado={ocupado} error={errorEliminar} onCancelar={()=>setEliminacion(null)} onConfirmar={confirmarEliminacion}/>}
-    {loading&&!data&&<Spinner/>}
+    {loading&&!data&&<LoadingSkeleton />}
     {asistenciaQrHabilitada&&elegida&&<>
       <label className="qr-selector">Clase para el QR<Select value={elegida.id_clase} onChange={e=>setSeleccion(Number(e.target.value))}>{todas.map(c=><option key={c.id_clase} value={c.id_clase}>{formatFecha(c.fecha.slice(0,10))} · {etiquetaBloque(c.hora_inicio,c.hora_fin)}</option>)}</Select></label>
       <AsistenciaQr key={elegida.id_clase} curso={curso} clase={elegida.id_clase} bloqueado={bloqueado||elegida.fecha.slice(0,10)!==data?.fecha_hoy} alCerrar={refetch}/>

@@ -6,7 +6,7 @@ import { Button } from '../components/Button'
 import { PageHeader } from '../components/PageHeader'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { EmptyState } from '../components/EmptyState'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { getErrorMessage } from '../utils/errors'
 import { formatHora } from '../utils/format'
 export function Inscripcion() {
@@ -22,7 +22,7 @@ export function Inscripcion() {
   return <div><PageHeader titulo="Inscripción de asignaturas"/>
     {mensaje&&<p role="status" className="mb-4 rounded-lg bg-success/15 p-3 text-success">{mensaje}</p>}
     {fallo&&<ErrorBanner mensaje={fallo}/>}
-    {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.oferta.length?<EmptyState mensaje="No hay cursos disponibles para tu plan en este período."/>:
+    {loading?<LoadingSkeleton variante="tarjetas" />:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.oferta.length?<EmptyState mensaje="No hay cursos disponibles para tu plan en este período."/>:
     <div className="grid gap-4 lg:grid-cols-2">{data.oferta.map(c=><article key={c.id_curso} className="rounded-xl border border-border bg-surface p-4">
       <h2 className="font-semibold">{c.codigo} · {c.nombre}</h2><p className="my-2 text-sm">Sección {c.seccion} · {c.creditos} créditos · {c.cupos_disponibles} cupos</p>
       <ul className="mb-3 text-sm text-muted">{c.horarios.map((h,i)=><li key={i}>{h.dia_semana}: {formatHora(h.hora_inicio)}–{formatHora(h.hora_fin)} · {h.sala??'Sala por asignar'}</li>)}</ul>

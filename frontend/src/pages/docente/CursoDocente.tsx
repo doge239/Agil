@@ -12,7 +12,7 @@ import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { ErrorBanner } from '../../components/ErrorBanner'
 import { EmptyState } from '../../components/EmptyState'
-import { Spinner } from '../../components/Spinner'
+import { LoadingSkeleton } from '../../components/Skeleton'
 import { Badge } from '../../components/Badge'
 import { getErrorMessage } from '../../utils/errors'
 import { formatFecha } from '../../utils/format'
@@ -66,7 +66,7 @@ function EditorNotas({curso,evaluacion,estudiantes,filas,alGuardar,bloqueado}:{c
 function NotasEvaluacion({curso,evaluacion,estudiantes,bloqueado}:{curso:number;evaluacion:number;estudiantes:EstudianteCurso[];bloqueado:boolean}) {
   const {data,loading,error,refetch}=useFetch(()=>getNotasDocente(curso,evaluacion),[curso,evaluacion])
   const [mensaje,setMensaje]=useState('')
-  if(loading)return <Spinner/>
+  if(loading)return <LoadingSkeleton />
   if(error)return <ErrorBanner mensaje={error} onRetry={refetch}/>
   return <><Resultado error="" mensaje={mensaje}/><Button variante="secondary" className="mb-3" onClick={()=>{setMensaje('');refetch()}}>Recargar notas</Button><EditorNotas curso={curso} evaluacion={evaluacion} estudiantes={estudiantes} filas={data?.notas??[]} alGuardar={()=>{setMensaje('Calificaciones guardadas.');refetch()}} bloqueado={bloqueado}/></>
 }
@@ -77,7 +77,7 @@ function NotasCurso({curso,estudiantes,bloqueado}:{curso:number;estudiantes:Estu
   const elegida=evaluaciones.find(e=>e.id_evaluacion===seleccion)??evaluaciones[0]
   return <section><h2 className="mb-3 text-lg font-semibold">Evaluaciones y calificaciones</h2>
     <FormularioEvaluacion curso={curso} alGuardar={refetch} bloqueado={bloqueado}/>
-    {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!elegida?<EmptyState mensaje="Crea una evaluación para registrar notas."/>:<>
+    {loading?<LoadingSkeleton />:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!elegida?<EmptyState mensaje="Crea una evaluación para registrar notas."/>:<>
       <p className="mb-3 text-sm">Ponderación total configurada: {evaluaciones.reduce((s,e)=>s+Number(e.porcentaje),0)}%</p>
       <label className="mb-3 flex flex-wrap items-center gap-3">Evaluación<Select className="rounded-lg border border-border bg-surface p-2" value={elegida.id_evaluacion} onChange={e=>{setSeleccion(Number(e.target.value));setEditar(false)}}>{evaluaciones.map(e=><option key={e.id_evaluacion} value={e.id_evaluacion}>{e.nombre} · {e.porcentaje}%</option>)}</Select></label>
       <Button variante="secondary" className="mb-3" onClick={()=>setEditar(!editar)} disabled={bloqueado}>{editar?'Cerrar edición':'Editar evaluación'}</Button>
@@ -88,7 +88,7 @@ function NotasCurso({curso,estudiantes,bloqueado}:{curso:number;estudiantes:Estu
 }
 function Historial({curso,estudiantes}:{curso:number;estudiantes:EstudianteCurso[]}) {
   const {data,loading,error,refetch}=useFetch(()=>getHistorialDocente(curso),[curso])
-  return <section><h2 className="mb-3 text-lg font-semibold">Historial de cambios</h2><p className="mb-3 text-sm text-muted">Últimas 200 operaciones del curso, con fecha y valores anteriores.</p>{loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.historial.length?<EmptyState mensaje="No hay cambios registrados."/>:<ul className="rounded-xl bg-surface p-4">{data.historial.map(h=>{
+  return <section><h2 className="mb-3 text-lg font-semibold">Historial de cambios</h2><p className="mb-3 text-sm text-muted">Últimas 200 operaciones del curso, con fecha y valores anteriores.</p>{loading?<LoadingSkeleton />:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.historial.length?<EmptyState mensaje="No hay cambios registrados."/>:<ul className="rounded-xl bg-surface p-4">{data.historial.map(h=>{
     const e=estudiantes.find(e=>e.id_estudiante===h.detalle.id_estudiante),anterior=h.detalle.anterior,nuevo=h.detalle.nuevo
     const antes=anterior?.nota??anterior?.estado??anterior?.nombre??'Sin registro'
     const despues=typeof nuevo==='number'?nuevo:nuevo?.nota??nuevo?.estado??nuevo?.nombre??'Registro creado'
@@ -104,7 +104,7 @@ export function CursoDocente() {
     return {curso,estudiantes:e.estudiantes}
   },[id])
   const [pestana,setPestana]=useState('estudiantes')
-  if(loading)return <Spinner/>
+  if(loading)return <LoadingSkeleton />
   if(error)return <ErrorBanner mensaje={error} onRetry={refetch}/>
   if(!data)return null
   const {curso,estudiantes}=data,bloqueado=curso.estado!=='ACTIVO'||curso.estado_periodo!=='ACTIVO'

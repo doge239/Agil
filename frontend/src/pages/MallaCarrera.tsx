@@ -7,7 +7,7 @@ import { Card } from '../components/Card'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { PageHeader } from '../components/PageHeader'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { useFetch } from '../hooks/useFetch'
 import type { MallaItem } from '../types/api'
 
@@ -30,9 +30,7 @@ export function MallaCarrera() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted">
-        <Spinner /> Cargando malla…
-      </div>
+      <LoadingSkeleton variante="tarjetas" cabecera />
     )
   }
 

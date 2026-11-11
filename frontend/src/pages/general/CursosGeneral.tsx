@@ -9,7 +9,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { Badge } from '../../components/Badge'
-import { Spinner } from '../../components/Spinner'
+import { LoadingSkeleton } from '../../components/Skeleton'
 import { ErrorBanner } from '../../components/ErrorBanner'
 import { EmptyState } from '../../components/EmptyState'
 import { useOperacionUnidad } from '../unidad/operacion'
@@ -48,6 +48,6 @@ export function CursosGeneral(){
       </fieldset>
       {oferta.error&&<ErrorBanner mensaje={oferta.error} onRetry={oferta.refetch}/>}{!oferta.loading&&!oferta.error&&!oferta.data?.asignaturas.length&&<p>No hay asignaturas de planes activos para esta unidad.</p>}<ResultadoUnidad {...op}/>
     </form>}</details>
-    {cursos.loading?<Spinner/>:cursos.error?<ErrorBanner mensaje={cursos.error} onRetry={cursos.refetch}/>:!filas.length?<EmptyState mensaje="No hay cursos para esta selección."/>:<div className="grid gap-4 lg:grid-cols-2">{filas.map(c=><EditarCurso key={`${c.id_curso}-${c.version}`} c={c} refrescar={cursos.refetch}/>)}</div>}
+    {cursos.loading?<LoadingSkeleton variante="tarjetas" />:cursos.error?<ErrorBanner mensaje={cursos.error} onRetry={cursos.refetch}/>:!filas.length?<EmptyState mensaje="No hay cursos para esta selección."/>:<div className="grid gap-4 lg:grid-cols-2">{filas.map(c=><EditarCurso key={`${c.id_curso}-${c.version}`} c={c} refrescar={cursos.refetch}/>)}</div>}
   </div>
 }

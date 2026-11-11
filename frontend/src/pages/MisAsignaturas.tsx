@@ -5,7 +5,7 @@ import type { Column } from '../components/DataTable'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { PageHeader } from '../components/PageHeader'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { useFetch } from '../hooks/useFetch'
 import type { AsignaturaInscrita } from '../types/api'
 
@@ -15,9 +15,7 @@ export function MisAsignaturas() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted">
-        <Spinner /> Cargando asignaturas…
-      </div>
+      <LoadingSkeleton cabecera />
     )
   }
 

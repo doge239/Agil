@@ -3,7 +3,7 @@ import { getMiPerfil } from '../api/usuarios'
 import { Card } from '../components/Card'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { PageHeader } from '../components/PageHeader'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { useFetch } from '../hooks/useFetch'
 
 function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | number | null }) {
@@ -21,9 +21,7 @@ export function MiPerfil({docente=false,unidad=false}:{docente?:boolean;unidad?:
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted">
-        <Spinner /> Cargando perfil…
-      </div>
+      <LoadingSkeleton variante="perfil" cabecera />
     )
   }
 

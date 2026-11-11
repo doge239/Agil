@@ -5,7 +5,7 @@ import { Button } from '../components/Button'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { PageHeader } from '../components/PageHeader'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { useAsignaturasMap } from '../hooks/useAsignaturasMap'
 import { useFetch } from '../hooks/useFetch'
 import { formatFecha, formatHora } from '../utils/format'
@@ -34,7 +34,7 @@ function RegistroAsistencia({ periodo }: { periodo: number | undefined }) {
     return () => { window.clearInterval(intervalo); window.removeEventListener('focus', actualizar) }
   }, [refetch])
 
-  if (loading && !data) return <div className="flex items-center gap-2 text-muted"><Spinner /> Cargando asistencia…</div>
+  if (loading && !data) return <LoadingSkeleton cabecera />
   if (error && !data) return <ErrorBanner mensaje={error} onRetry={refetch} />
 
   const asistencia = data?.asistencia ?? []
@@ -47,7 +47,7 @@ function RegistroAsistencia({ periodo }: { periodo: number | undefined }) {
   const estadoElegido = elegida ? estadoAsistencia(elegida.estado) : null
 
   return <div className="asistencia-visual">
-    <PageHeader titulo="Asistencia" />
+    <PageHeader titulo="Asistencia" descripcion={asistencia.length > 0 ? 'Selecciona un cuadro para ver la fecha, el horario y el detalle de esa clase.' : undefined} />
     <div className="asistencia-toolbar">
       <ul className="asistencia-leyenda" aria-label="Colores y símbolos de asistencia">
         {estados.map(item => <li key={item.estado}>
@@ -59,9 +59,6 @@ function RegistroAsistencia({ periodo }: { periodo: number | undefined }) {
     {error && <ErrorBanner mensaje={error} onRetry={refetch} />}
     {!asistencia.length ? <EmptyState mensaje="Aún no hay clases realizadas en este período. Los cuadros aparecerán a medida que se registren las clases." /> : <>
       <div className="asistencia-panel glass-panel">
-        <div className="asistencia-panel-heading">
-          <span className="asistencia-total">{asistencia.length} {asistencia.length === 1 ? 'clase realizada' : 'clases realizadas'}</span>
-        </div>
         <div className="asistencia-scroll" role="region" aria-label="Registro de asistencia por asignatura" tabIndex={0}>
           <table className="asistencia-grilla">
             <caption className="sr-only">Selecciona un cuadro para consultar la fecha, el horario y la observación de una clase.</caption>
@@ -84,19 +81,19 @@ function RegistroAsistencia({ periodo }: { periodo: number | undefined }) {
                 })}
               </ol></td>
               <td className="asistencia-porcentaje"><strong>{curso.porcentaje===null?'—':`${curso.porcentaje}%`}</strong>
-                <span>{curso.asistidas} de {curso.confirmadas} clases computadas</span></td>
+                <span>{curso.asistidas} de {curso.confirmadas} clases con asistencia</span></td>
             </tr>)}</tbody>
           </table>
         </div>
       </div>
-      <section id="asistencia-detalle" className="asistencia-detalle glass-panel" aria-label="Detalle de la clase" aria-live="polite" aria-atomic="true">
+      <section id="asistencia-detalle" className="asistencia-detalle glass-panel" hidden={!elegida} aria-label="Detalle de la clase" aria-live="polite" aria-atomic="true">
         {elegida && estadoElegido ? <>
           <div className="asistencia-detalle-heading"><div><p>Detalle de la clase</p><h2>{asignaturas.get(elegida.id_asignatura)?.nombre ?? `Curso ${elegida.id_curso}`}</h2></div>
             <span className={`asistencia-detalle-estado asistencia-estado-${estadoElegido.estado}`}>{estadoElegido.simbolo} {estadoElegido.etiqueta}</span></div>
           <dl><div><dt>Fecha</dt><dd>{formatFecha(elegida.fecha.slice(0, 10))}</dd></div>
             <div><dt>Horario</dt><dd>{formatHora(elegida.hora_inicio)} – {formatHora(elegida.hora_fin)}</dd></div>
             <div className="asistencia-observacion"><dt>Observación</dt><dd>{elegida.observacion || 'Sin observaciones registradas.'}</dd></div></dl>
-        </> : <p className="asistencia-instruccion">Selecciona un cuadro para ver la fecha, el horario y el detalle de esa clase.</p>}
+        </> : null}
       </section>
     </>}
   </div>

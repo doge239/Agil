@@ -6,7 +6,7 @@ import { useFetch } from '../hooks/useFetch'
 import { PageHeader } from '../components/PageHeader'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { EmptyState } from '../components/EmptyState'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { BLOQUES, DIAS, aMinutos, asignarColores, bloqueParaHorario, normalizarDia, seSuperponen } from '../utils/horario'
 import { formatHora } from '../utils/format'
 import './horario.css'
@@ -31,7 +31,7 @@ export function Horario() {
   const asignaturas = [...new Map(items.map(c => [c.id_asignatura, c])).values()]
   return <div className="horario-semanal">
     <PageHeader titulo="Horario del semestre" />
-    {loading ? <Spinner /> : error ? <ErrorBanner mensaje={error} onRetry={refetch} /> : !items.length ? <EmptyState mensaje="No hay clases registradas en este período." /> : <>
+    {loading ? <LoadingSkeleton variante="horario" /> : error ? <ErrorBanner mensaje={error} onRetry={refetch} /> : !items.length ? <EmptyState mensaje="No hay clases registradas en este período." /> : <>
       <div className="horario-herramientas">
         <p><strong>{asignaturas.length}</strong> asignaturas <span>·</span> <strong>{items.length}</strong> sesiones semanales</p>
         <label>Ver día <Select aria-label="Ver día" value={diaElegido} onChange={e => setDiaElegido(e.target.value)}><option value="TODOS">Semana completa</option>{dias.map(d => <option key={d} value={normalizarDia(d)}>{d}</option>)}</Select></label>

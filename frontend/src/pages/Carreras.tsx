@@ -6,7 +6,7 @@ import type { Column } from '../components/DataTable'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { PageHeader } from '../components/PageHeader'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { useFetch } from '../hooks/useFetch'
 import type { Carrera } from '../types/api'
 
@@ -15,9 +15,7 @@ export function Carreras() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted">
-        <Spinner /> Cargando carreras…
-      </div>
+      <LoadingSkeleton cabecera />
     )
   }
 
@@ -25,7 +23,7 @@ export function Carreras() {
     return <ErrorBanner mensaje={error} onRetry={refetch} />
   }
 
-  const carreras = data?.carreras ?? []
+  const carreras = data?.carreras.filter(carrera => carrera.codigo === 'ITI') ?? []
 
   const columnas: Column<Carrera>[] = [
     { key: 'codigo', header: 'Código', render: (fila) => fila.codigo },

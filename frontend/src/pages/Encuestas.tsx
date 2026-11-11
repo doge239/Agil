@@ -6,7 +6,7 @@ import { useFetch } from '../hooks/useFetch'
 import { PageHeader } from '../components/PageHeader'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { EmptyState } from '../components/EmptyState'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { Button } from '../components/Button'
 import { getErrorMessage } from '../utils/errors'
 import { formatFecha } from '../utils/format'
@@ -42,7 +42,7 @@ function ListaEncuestas({periodo}:{periodo:number|undefined}) {
   function enviada(){setMensaje('Encuesta enviada correctamente. Puedes seleccionar otra.');setSeleccion('');refetch()}
   return <div><PageHeader titulo="Encuesta docente" descripcion="Encuestas correspondientes a los cursos en los que estás inscrito."/>
     {mensaje&&<p role="status" className="mb-4 rounded-xl border border-border bg-surface p-4 text-sm">{mensaje}</p>}
-    {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.encuestas.length?<EmptyState mensaje="No tienes encuestas habilitadas en este período."/>:<>
+    {loading?<LoadingSkeleton variante="tarjetas" />:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.encuestas.length?<EmptyState mensaje="No tienes encuestas habilitadas en este período."/>:<>
       <SelectorEncuesta encuestas={data.encuestas} valor={seleccion} disabled={ocupado} onChange={valor=>{setSeleccion(valor);setMensaje('')}}/>
       {elegida?<>
         <Button type="button" variante="secondary" className="mb-4" disabled={ocupado} onClick={()=>setSeleccion('')}>Cerrar encuesta</Button>

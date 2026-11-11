@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { ErrorBanner } from '../components/ErrorBanner'
-import { Spinner } from '../components/Spinner'
+import { LoadingSkeleton } from '../components/Skeleton'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { LogoUcn } from '../components/LogoUcn'
 import { getErrorMessage } from '../utils/errors'
@@ -32,7 +32,7 @@ function ConfirmarAsistencia({token}:{token:string}) {
   return <main className="qr-estudiante-page"><header><LogoUcn/><ThemeToggle/></header>
     <section className="qr-estudiante-tarjeta glass-panel">
       <p className="qr-ceja">Registro de asistencia</p><h1>Confirma tu asistencia</h1>
-      {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:data&&<>
+      {loading?<LoadingSkeleton variante="perfil" />:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:data&&<>
         <h2>{data.clase.nombre}</h2><p>{data.clase.codigo} · Sección {data.clase.seccion} · {formatFecha(data.clase.fecha)}</p>
         <p className="qr-cuenta">Cuenta: {usuario?.correo}</p>
         {estado?<div className="qr-resultado" role="status"><strong>{estadoAsistencia(estado).etiqueta}</strong><p>{resultado?.mensaje??'Ya tienes asistencia registrada en esta clase. El docente puede revisar o corregir tu registro.'}</p></div>:
