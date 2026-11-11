@@ -1,0 +1,48 @@
+.portal-select { position: relative; display: inline-flex; flex-direction: column; width: 100%; min-width: 0; max-width: 100%; vertical-align: middle; }
+.portal-select-native { position: absolute !important; width: 1px !important; height: 1px !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; opacity: 0 !important; clip-path: inset(50%) !important; pointer-events: none; }
+.portal-select-trigger { display: flex; align-items: center; gap: 9px; width: 100%; min-width: 0; min-height: 42px; padding: 9px 12px; border: 1px solid #8aafc671; border-radius: 12px; color: var(--text); background: linear-gradient(125deg,#f8fcffe8,#e8f2fac7); box-shadow: 0 3px 10px #153a5b08,inset 0 1px 0 #ffffff9c; font: inherit; font-size: 12px; text-align: left; }
+.portal-select-trigger:hover:not(:disabled) { border-color: #5896bc; }
+.portal-select-trigger[aria-expanded='true'] { border-color: #368aae; box-shadow: 0 0 0 3px #368aae1c; }
+.portal-select-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.portal-select-trigger:disabled { cursor: not-allowed; opacity: .55; }
+.portal-select-trigger[aria-invalid='true'] { border-color: var(--danger); }
+.portal-select-icon { display: grid; place-items: center; flex-shrink: 0; width: 27px; height: 27px; border-radius: 8px; background: #2585b014; color: var(--primary); }
+.portal-select-icon svg { width: 15px; height: 15px; }
+.portal-select-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; font-weight: 550; }
+.portal-select-chevron { flex-shrink: 0; width: 14px; height: 14px; color: var(--text-secondary); transform: rotate(90deg); transition: transform .18s; }
+.portal-select-trigger[aria-expanded='true'] .portal-select-chevron { transform: rotate(-90deg); }
+.portal-select-error { margin-top: 5px; color: var(--danger); font-size: 11px; line-height: 1.5; }
+.portal-select-menu { z-index: 200; display: flex; flex-direction: column; border: 1px solid #8aafc671; border-radius: 15px; background: #f8fbff; color: var(--text); box-shadow: 0 18px 45px #09213c30,0 3px 10px #09213c12; overflow: hidden; font-family: var(--font-sans); text-align: left; }
+.portal-select-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; flex-shrink: 0; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 650; line-height: 1.5; }
+.portal-select-heading > span { min-width: 0; overflow-wrap: anywhere; }
+.portal-select-heading small { flex-shrink: 0; color: var(--text-secondary); font-size: 10px; font-weight: 400; }
+.portal-select-options { position: relative; overflow: auto; overscroll-behavior: contain; min-height: 0; margin: 0; padding: 6px; list-style: none; scrollbar-width: thin; scrollbar-color: #80a2ba88 transparent; }
+.portal-select-option { display: flex; align-items: center; gap: 10px; padding: 10px; min-height: 42px; border: 1px solid transparent; border-radius: 9px; cursor: pointer; }
+.portal-select-option + .portal-select-option { margin-top: 2px; }
+.portal-select-option.is-active:not([aria-disabled='true']) { background: #e7f2fa; }
+.portal-select-option.is-selected { background: #dceef8; border-color: #8aafc64d; }
+.portal-select-option[aria-disabled='true'] { opacity: .45; cursor: not-allowed; }
+.portal-select-option-mark { display: grid; place-items: center; flex-shrink: 0; width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 50%; font-size: 12px; font-weight: 750; color: var(--primary); background: #2585b009; }
+.portal-select-option-mark.is-multiple { border-radius: 5px; }
+.portal-select-option.is-selected .portal-select-option-mark { background: #176d8a; color: #fff; border-color: #176d8a; }
+.portal-select-option-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.portal-select-option-text strong { font-size: 12px; font-weight: 550; line-height: 1.5; }
+.portal-select-option-text > span { font-size: 11px; line-height: 1.5; color: var(--text-secondary); }
+.portal-select-group { padding: 10px 10px 5px; font-size: 10px; color: var(--text-secondary); font-weight: 650; }
+.portal-select-empty { padding: 14px; font-size: 12px; color: var(--text-secondary); }
+.portal-select-done { flex-shrink: 0; border: 0; border-top: 1px solid var(--border); padding: 11px 14px; background: #edf5fa; color: var(--primary); font-size: 12px; font-weight: 650; text-align: right; }
+html[data-theme='dark'] .portal-select-trigger { background: linear-gradient(125deg,#173a4f,#102b3eed); border-color: #527a9470; box-shadow: 0 3px 10px #00000012,inset 0 1px 0 #c7eaff12; }
+html[data-theme='dark'] .portal-select-menu { background: #102b3e; border-color: #527a9470; }
+html[data-theme='dark'] .portal-select-option.is-active:not([aria-disabled='true']) { background: #1c3b50; }
+html[data-theme='dark'] .portal-select-option.is-selected { background: #1d455d; border-color: #527a9460; }
+html[data-theme='dark'] .portal-select-option.is-selected .portal-select-option-mark { background: #74c5dd; border-color: #74c5dd; color: #092c3c; }
+html[data-theme='dark'] .portal-select-done { background: #153448; }
+.period-selector .portal-select { width: auto; min-width: 195px; max-width: 310px; }
+.period-selector .portal-select-trigger { font-size: 11px; min-height: 38px; padding: 6px 10px; }
+.period-selector .portal-select-icon { display: none; }
+.avance-herramientas .portal-select { min-width: 150px; }
+.avance-herramientas .portal-select-trigger { font-size: 11px; }
+.horario-herramientas .portal-select { width: auto; min-width: 165px; }
+@media (max-width: 600px) { .portal-select-trigger { padding: 8px 10px; }.period-selector .portal-select { min-width: 180px; max-width: 100%; }.portal-select-option { min-height: 44px; }.portal-select-heading { padding: 10px 12px; } }
+@media (prefers-reduced-motion: reduce) { .portal-select-chevron { transition: none; } }
+@media (forced-colors: active) { .portal-select-option.is-active { outline: 1px solid Highlight; }.portal-select-option.is-selected .portal-select-option-mark { forced-color-adjust: none; background: Highlight; color: HighlightText; } }

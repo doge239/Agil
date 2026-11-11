@@ -1,73 +1,103 @@
+import { useEffect, useState } from 'react'
 import { getAsistencia } from '../api/academico'
 import { usePeriodo } from '../context/periodo'
-import { Badge } from '../components/Badge'
-import { DataTable } from '../components/DataTable'
-import type { Column } from '../components/DataTable'
+import { Button } from '../components/Button'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorBanner } from '../components/ErrorBanner'
 import { PageHeader } from '../components/PageHeader'
 import { Spinner } from '../components/Spinner'
 import { useAsignaturasMap } from '../hooks/useAsignaturasMap'
 import { useFetch } from '../hooks/useFetch'
-import type { AsistenciaItem } from '../types/api'
 import { formatFecha, formatHora } from '../utils/format'
+import './asistencia.css'
+import { estadosAsistencia as estados, estadoAsistencia, resumirAsistencia } from '../utils/asistencia'
+
+function fechaCorta(fecha: string) {
+  // La fecha académica es un día civil, incluso si llega con medianoche UTC.
+  return new Date(`${fecha.slice(0, 10)}T12:00:00`).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })
+}
 
 export function Asistencia() {
-  const periodo=usePeriodo()
+  const periodo = usePeriodo()
+  return <RegistroAsistencia key={periodo} periodo={periodo} />
+}
+
+function RegistroAsistencia({ periodo }: { periodo: number | undefined }) {
   const { data, loading, error, refetch } = useFetch(() => getAsistencia(periodo), [periodo])
   const asignaturas = useAsignaturasMap()
+  const [seleccion, setSeleccion] = useState<number | null>(null)
 
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-muted">
-        <Spinner /> Cargando asistencia…
-      </div>
-    )
-  }
+  useEffect(() => {
+    const actualizar = () => { if (!document.hidden) refetch() }
+    const intervalo = window.setInterval(actualizar, 60_000)
+    window.addEventListener('focus', actualizar)
+    return () => { window.clearInterval(intervalo); window.removeEventListener('focus', actualizar) }
+  }, [refetch])
 
-  if (error) {
-    return <ErrorBanner mensaje={error} onRetry={refetch} />
-  }
+  if (loading && !data) return <div className="flex items-center gap-2 text-muted"><Spinner /> Cargando asistencia…</div>
+  if (error && !data) return <ErrorBanner mensaje={error} onRetry={refetch} />
 
   const asistencia = data?.asistencia ?? []
-  const resumen = [...new Set(asistencia.map(a=>a.id_curso))].map(id=> {
-    const filas=asistencia.filter(a=>a.id_curso===id)
-    const registradas=filas.filter(a=>a.estado!=='PENDIENTE').length
-    const presentes=filas.filter(a=>a.estado==='PRESENTE').length
-    return {id,id_asignatura:filas[0].id_asignatura,registradas,presentes}
+  const cursos = [...new Set(asistencia.map(clase => clase.id_curso))].map(id => {
+    const clases = asistencia.filter(clase => clase.id_curso === id).sort((a, b) =>
+      a.fecha.localeCompare(b.fecha) || (a.hora_inicio ?? '').localeCompare(b.hora_inicio ?? '') || a.id_clase - b.id_clase)
+    return { id, clases, ...resumirAsistencia(clases), asignatura: asignaturas.get(clases[0].id_asignatura) }
   })
+  const elegida = asistencia.find(clase => clase.id_clase === seleccion)
+  const estadoElegido = elegida ? estadoAsistencia(elegida.estado) : null
 
-  const columnas: Column<AsistenciaItem>[] = [
-    { key: 'fecha', header: 'Fecha', render: (fila) => formatFecha(fila.fecha) },
-    {
-      key: 'hora',
-      header: 'Horario',
-      render: (fila) => `${formatHora(fila.hora_inicio)} - ${formatHora(fila.hora_fin)}`,
-    },
-    {
-      key: 'asignatura',
-      header: 'Asignatura',
-      render: (fila) =>
-        asignaturas.get(fila.id_asignatura)?.nombre ?? `Asignatura #${fila.id_asignatura}`,
-    },
-    { key: 'estado', header: 'Estado', render: (fila) => <Badge estado={fila.estado} /> },
-    { key: 'observacion', header: 'Observación', render: (fila) => fila.observacion ?? '—' },
-  ]
-
-  return (
-    <div>
-      <PageHeader titulo="Asistencia" descripcion="Registro de clases del período seleccionado." />
-      <div className="mb-4 grid gap-3 sm:grid-cols-2">{resumen.map(r=><div key={r.id} className="rounded-lg bg-surface p-3"><p className="font-medium">{asignaturas.get(r.id_asignatura)?.nombre??`Asignatura #${r.id_asignatura}`} · Curso #{r.id}</p><p className="text-sm text-muted">{r.registradas?`${Math.round(100*r.presentes/r.registradas)}% de registros PRESENTE`:'Sin registros confirmados'} · {r.presentes}/{r.registradas}. No incluye pendientes en el denominador.</p></div>)}</div>
-      <p className="mb-4 text-sm text-muted">Los registros pendientes no se consideran ausencias. Presentes: {asistencia.filter(a=>a.estado==='PRESENTE').length}; ausentes: {asistencia.filter(a=>a.estado==='AUSENTE').length}; pendientes: {asistencia.filter(a=>a.estado==='PENDIENTE').length}.</p>
-      {asistencia.length === 0 ? (
-        <EmptyState mensaje="No hay registros de asistencia." />
-      ) : (
-        <DataTable
-          columns={columnas}
-          rows={asistencia}
-          getRowKey={(fila, i) => `${fila.id_curso}-${fila.fecha}-${i}`}
-        />
-      )}
+  return <div className="asistencia-visual">
+    <PageHeader titulo="Asistencia" />
+    <div className="asistencia-toolbar">
+      <ul className="asistencia-leyenda" aria-label="Colores y símbolos de asistencia">
+        {estados.map(item => <li key={item.estado}>
+          <span className={`asistencia-muestra asistencia-estado-${item.estado}`} aria-hidden="true">{item.simbolo}</span>{item.etiqueta}
+        </li>)}
+      </ul>
+      <Button variante="secondary" onClick={refetch} disabled={loading}>{loading ? 'Actualizando…' : 'Actualizar'}</Button>
     </div>
-  )
+    {error && <ErrorBanner mensaje={error} onRetry={refetch} />}
+    {!asistencia.length ? <EmptyState mensaje="Aún no hay clases realizadas en este período. Los cuadros aparecerán a medida que se registren las clases." /> : <>
+      <div className="asistencia-panel glass-panel">
+        <div className="asistencia-panel-heading">
+          <span className="asistencia-total">{asistencia.length} {asistencia.length === 1 ? 'clase realizada' : 'clases realizadas'}</span>
+        </div>
+        <div className="asistencia-scroll" role="region" aria-label="Registro de asistencia por asignatura" tabIndex={0}>
+          <table className="asistencia-grilla">
+            <caption className="sr-only">Selecciona un cuadro para consultar la fecha, el horario y la observación de una clase.</caption>
+            <thead><tr><th scope="col">Asignatura</th><th scope="col">Clases realizadas</th><th scope="col">Asistencia</th></tr></thead>
+            <tbody>{cursos.map(curso => <tr key={curso.id}>
+              <th scope="row"><strong>{curso.asignatura?.nombre ?? `Asignatura #${curso.clases[0].id_asignatura}`}</strong>
+                <span>{curso.asignatura?.codigo ?? 'Código por confirmar'} · Curso {curso.id}</span></th>
+              <td><ol className="asistencia-cuadros" aria-label={`Clases de ${curso.asignatura?.nombre ?? `curso ${curso.id}`}`}>
+                {curso.clases.map(clase => {
+                  const estado = estadoAsistencia(clase.estado)
+                  const descripcion = `${curso.asignatura?.nombre ?? `Curso ${curso.id}`} · ${formatFecha(clase.fecha.slice(0, 10))} · ${formatHora(clase.hora_inicio)}–${formatHora(clase.hora_fin)} · ${estado.etiqueta}`
+                  return <li key={clase.id_clase}>
+                    <button type="button" className={`asistencia-cuadro asistencia-estado-${estado.estado}`}
+                      aria-label={descripcion} title={descripcion} aria-pressed={elegida?.id_clase === clase.id_clase}
+                      aria-controls="asistencia-detalle" onClick={() => setSeleccion(actual => actual === clase.id_clase ? null : clase.id_clase)}>
+                      <span aria-hidden="true">{estado.simbolo}</span>
+                    </button>
+                    <time dateTime={clase.fecha.slice(0, 10)}>{fechaCorta(clase.fecha)}</time>
+                  </li>
+                })}
+              </ol></td>
+              <td className="asistencia-porcentaje"><strong>{curso.porcentaje===null?'—':`${curso.porcentaje}%`}</strong>
+                <span>{curso.asistidas} de {curso.confirmadas} clases computadas</span></td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+      </div>
+      <section id="asistencia-detalle" className="asistencia-detalle glass-panel" aria-label="Detalle de la clase" aria-live="polite" aria-atomic="true">
+        {elegida && estadoElegido ? <>
+          <div className="asistencia-detalle-heading"><div><p>Detalle de la clase</p><h2>{asignaturas.get(elegida.id_asignatura)?.nombre ?? `Curso ${elegida.id_curso}`}</h2></div>
+            <span className={`asistencia-detalle-estado asistencia-estado-${estadoElegido.estado}`}>{estadoElegido.simbolo} {estadoElegido.etiqueta}</span></div>
+          <dl><div><dt>Fecha</dt><dd>{formatFecha(elegida.fecha.slice(0, 10))}</dd></div>
+            <div><dt>Horario</dt><dd>{formatHora(elegida.hora_inicio)} – {formatHora(elegida.hora_fin)}</dd></div>
+            <div className="asistencia-observacion"><dt>Observación</dt><dd>{elegida.observacion || 'Sin observaciones registradas.'}</dd></div></dl>
+        </> : <p className="asistencia-instruccion">Selecciona un cuadro para ver la fecha, el horario y el detalle de esa clase.</p>}
+      </section>
+    </>}
+  </div>
 }

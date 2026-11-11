@@ -35,6 +35,12 @@ export function bloqueParaHorario(horaInicio: string, horaFin: string): string {
   return BLOQUES.find(b => inicio >= aMinutos(b.hora_inicio) && fin <= aMinutos(b.hora_fin))?.letra ?? 'ESPECIAL'
 }
 
+export function etiquetaBloque(horaInicio: string | null, horaFin: string | null): string {
+  if (!horaInicio || !horaFin) return 'Sin bloque'
+  const bloque = bloqueParaHorario(horaInicio, horaFin)
+  return bloque === 'ESPECIAL' ? `Especial · ${horaInicio.slice(0, 5)}–${horaFin.slice(0, 5)}` : `Bloque ${bloque}`
+}
+
 export function seSuperponen(a: {dia_semana:string;hora_inicio:string;hora_fin:string}, b: {dia_semana:string;hora_inicio:string;hora_fin:string}): boolean {
   return normalizarDia(a.dia_semana) === normalizarDia(b.dia_semana)
     && aMinutos(a.hora_inicio) < aMinutos(b.hora_fin)

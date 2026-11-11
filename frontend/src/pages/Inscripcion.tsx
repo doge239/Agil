@@ -19,7 +19,7 @@ export function Inscripcion() {
     try { await accion();setMensaje(correcto);refetch() }
     catch(e) {setFallo(getErrorMessage(e))} finally {setOcupado(null)}
   }
-  return <div><PageHeader titulo="Inscripción de asignaturas" descripcion="Oferta de tu plan. Se validarán cupos, prerrequisitos, restricciones y horario al inscribir."/>
+  return <div><PageHeader titulo="Inscripción de asignaturas"/>
     {mensaje&&<p role="status" className="mb-4 rounded-lg bg-success/15 p-3 text-success">{mensaje}</p>}
     {fallo&&<ErrorBanner mensaje={fallo}/>}
     {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!data?.oferta.length?<EmptyState mensaje="No hay cursos disponibles para tu plan en este período."/>:

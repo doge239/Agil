@@ -8,6 +8,19 @@ y evitar un borde brusco al recorrer páginas largas. No hay fuentes ni recursos
 
 ## Componentes compartidos
 
+Los desplegables de períodos, filtros y formularios usan `components/Select.tsx` y
+`components/select.css`, con la misma línea visual del selector de encuestas: iconos,
+opciones separadas, marca de selección y temas claro/oscuro. Los menús se posicionan en
+el espacio disponible, fuera de los paneles para evitar recortes; dentro de un diálogo
+permanecen en su capa modal. Admiten flechas, Home/End, escritura para buscar, Enter,
+Escape y selección múltiple sin exigir Ctrl. Las opciones deshabilitadas se conservan.
+
+El control mantiene un select nativo oculto para `FormData`, `required`, `defaultValue`,
+`selectedOptions`, reinicio de formularios y bloqueo heredado de `fieldset`. La fixture
+`frontend/tests/fixtures/SelectFixture.tsx` permite comprobar estos contratos en navegador;
+no forma parte de las rutas del producto. El selector de encuestas conserva su presentación
+específica con títulos, asignaturas y estados.
+
 - `frontend/src/styles/liquid-glass.css`: superficies, navegación, botones, formularios,
   login, inicio y adaptación a móvil.
 - `frontend/src/components/PortalIcon.tsx` y `utils/portalIcons.ts`: iconos SVG de navegación.

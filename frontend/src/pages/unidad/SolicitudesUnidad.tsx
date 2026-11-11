@@ -1,3 +1,4 @@
+import { Select } from '../../components/Select'
 import type { FormEvent } from 'react'
 import { getSolicitudesUnidad,resolverSolicitudUnidad } from '../../api/unidad'
 import type { Solicitud } from '../../types/api'
@@ -15,7 +16,7 @@ import { formatFecha } from '../../utils/format'
 function Resolucion({s,refrescar}:{s:Solicitud;refrescar:()=>void}){
   const op=useOperacionUnidad()
   async function enviar(e:FormEvent<HTMLFormElement>){e.preventDefault();const d=new FormData(e.currentTarget);await op.ejecutar(()=>resolverSolicitudUnidad(s.id_solicitud,String(d.get('estado')),String(d.get('resolucion'))),refrescar,'Solicitud resuelta.')}
-  return <form onSubmit={enviar} className="mt-3 flex flex-col gap-3"><label className="flex flex-col gap-2">Decisión<select name="estado" className="rounded-lg border border-border bg-surface p-2"><option value="APROBADA">Aprobar y levantar restricción</option><option value="RECHAZADA">Rechazar solicitud</option></select></label><Input label="Motivo de resolución" name="resolucion" minLength={10} maxLength={2000} required/><Button type="submit" cargando={op.ocupado}>Resolver solicitud</Button><ResultadoUnidad {...op}/></form>
+  return <form onSubmit={enviar} className="mt-3 flex flex-col gap-3"><label className="flex flex-col gap-2">Decisión<Select name="estado" className="rounded-lg border border-border bg-surface p-2"><option value="APROBADA">Aprobar y levantar restricción</option><option value="RECHAZADA">Rechazar solicitud</option></Select></label><Input label="Motivo de resolución" name="resolucion" minLength={10} maxLength={2000} required/><Button type="submit" cargando={op.ocupado}>Resolver solicitud</Button><ResultadoUnidad {...op}/></form>
 }
 export function SolicitudesUnidad({general=false}:{general?:boolean}){
   const {data,loading,error,refetch}=useFetch(getSolicitudesUnidad,[])

@@ -1,8 +1,9 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { FullScreenLoader } from './FullScreenLoader'
 
 export function ProtectedRoute({roles=['ESTUDIANTE','DOCENTE']}:{roles?:string[]}) {
+  const location = useLocation()
   const { autenticado, inicializando, usuario, logout } = useAuth()
 
   if (inicializando) {
@@ -10,7 +11,7 @@ export function ProtectedRoute({roles=['ESTUDIANTE','DOCENTE']}:{roles?:string[]
   }
 
   if (!autenticado) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace state={{volverA:location.pathname + location.search}} />
   }
 
   if (!usuario?.roles.some(r=>roles.includes(r))) {

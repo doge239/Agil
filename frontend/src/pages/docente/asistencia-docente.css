@@ -1,0 +1,59 @@
+.asistencia-docente { min-width: 0; }
+.asistencia-docente h2 { font-size: 19px; font-weight: 700; margin: 0; }
+.asistencia-docente h3, .qr-panel h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
+.asistencia-docente .asistencia-toolbar p { font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
+.qr-panel { padding: 22px; border-radius: 18px; margin-bottom: 20px; display: grid; gap: 14px; }
+.qr-panel p { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.qr-configuracion { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; min-width: 0; }
+.qr-configuracion > label, .qr-configuracion > div { flex: 1 1 150px; min-width: 0; }
+.qr-configuracion label, .qr-selector { display: flex; flex-direction: column; gap: 7px; font-size: 12px; }
+.qr-configuracion input, .qr-configuracion select, .qr-selector select { padding: 10px 12px; min-height: 42px; width: 100%; }
+.qr-selector { margin: 0 0 18px; max-width: 440px; }
+.qr-ayuda { font-size: 11px; line-height: 1.7; color: var(--text-secondary); }
+.qr-mensaje { padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 13px; margin: 0 0 16px; }
+.qr-proyeccion { display: flex; align-items: center; flex-wrap: wrap; gap: 28px; padding: 14px 0; }
+.qr-proyeccion img { width: 280px; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 12px; }
+.qr-proyeccion > div { display: grid; gap: 14px; flex: 1 1 220px; }
+.qr-proyeccion h4 { font-size: 20px; font-weight: 700; margin: 0; }
+.qr-proyeccion a, .qr-estudiante-tarjeta > a { font-size: 13px; color: var(--primary); text-decoration: underline; }
+.qr-proyeccion button { justify-self: start; }
+.qr-vigencia { justify-self: start; color: var(--success); font-weight: 700; font-size: 15px; }
+.qr-cierre { border-top: 1px solid var(--border); padding-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.qr-cierre label { display: flex; align-items: center; gap: 9px; font-size: 12px; flex: 1 1 260px; }
+.docente-grilla-scroll { max-height: 560px; overflow: auto; }
+.docente-grilla thead th { position: sticky; top: 0; z-index: 3; background: var(--asistencia-fondo-fijo); min-width: 80px; white-space: nowrap; text-align: center; }
+.docente-grilla thead th:first-child, .docente-grilla thead th:last-child { z-index: 4; }
+.docente-grilla thead th:first-child { text-align: left; }
+.docente-grilla thead span { display: block; margin-top: 4px; font-weight: 400; }
+.docente-grilla td { text-align: center; }
+.docente-grilla .asistencia-cuadro { margin: auto; }
+.docente-grilla .asistencia-porcentaje { text-align: left; }
+.qr-estudiante-page { min-height: 100dvh; padding: 24px; }
+.qr-estudiante-page > header { max-width: 900px; margin: 0 auto 40px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.qr-estudiante-page > header img { max-width: 160px; max-height: 55px; }
+.qr-estudiante-tarjeta { max-width: 520px; margin: auto; border-radius: 24px; padding: 30px; display: grid; gap: 20px; }
+.qr-estudiante-tarjeta h1 { margin: 0; font-size: 28px; font-weight: 750; line-height: 1.2; }
+.qr-estudiante-tarjeta h2 { margin: 0; font-size: 18px; font-weight: 650; }
+.qr-estudiante-tarjeta p { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.qr-estudiante-tarjeta .qr-ceja { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.qr-cuenta { overflow-wrap: anywhere; }
+.qr-estudiante-form { display: grid; gap: 18px; }
+.qr-estudiante-form input { padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); width: 100%; }
+.qr-resultado { padding: 18px; border: 1px solid var(--border); border-radius: 12px; }
+.qr-resultado strong { display: block; margin-bottom: 10px; font-size: 19px; }
+.eliminar-clase-dialogo { margin: auto; width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 40px); overflow: auto; padding: 26px; background: #f4f8fc; color: var(--text); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 24px 80px #00152855; }
+.eliminar-clase-dialogo::backdrop { background: #081d36a6; backdrop-filter: blur(4px); }
+.eliminar-clase-dialogo form { display: grid; gap: 18px; }
+.eliminar-clase-dialogo h2 { font-size: 21px; margin: 0; }
+.eliminar-clase-dialogo p { font-size: 13px; line-height: 1.7; margin: 0; }
+.eliminar-clase-fecha { color: var(--text-secondary); }
+.eliminar-clase-acciones { display: flex; flex-wrap: wrap; justify-content: end; gap: 10px; }
+html[data-theme='dark'] .eliminar-clase-dialogo { background: #102b3e; }
+html[data-theme='dark'] .docente-grilla thead th { background: var(--asistencia-fondo-fijo); }
+@media (max-width: 767px) {
+  .qr-panel { padding: 16px; }
+  .qr-configuracion > label, .qr-configuracion > div { flex-basis: 100%; }
+  .qr-estudiante-page { padding: 16px; }
+  .qr-estudiante-tarjeta { padding: 24px 18px; }
+  .docente-grilla thead th { min-width: 70px; }
+}

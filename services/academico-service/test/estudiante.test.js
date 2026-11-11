@@ -34,6 +34,7 @@ before(async()=> {
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/005_avance_curricular.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/006_admin_general.sql'),'utf8'));
     if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/006_lista_espera.sql'),'utf8'));
+    if(nombre==='academico')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/academico/007_asistencia_qr.sql'),'utf8'));
     if(nombre==='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/catalogo/001_avance_iti.sql'),'utf8'));
     if(nombre==='catalogo')await pg.exec(fs.readFileSync(path.join(root,'databases/migrations/catalogo/003_admin_general.sql'),'utf8'));
   }

@@ -1,3 +1,4 @@
+import { Select } from '../components/Select'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { getSolicitudes,solicitar } from '../api/estudiante'
@@ -25,7 +26,7 @@ export function Solicitudes() {
         {!data?.restricciones.length?<EmptyState mensaje="No tienes restricciones registradas."/>:data.restricciones.map(r=><div key={r.id_restriccion} className="border-t border-border py-3"><Badge estado={r.activa?'ACTIVA':'LEVANTADA'}/> <strong>{r.tipo}</strong><p>{r.descripcion}</p></div>)}
       </section>
       {!!disponibles.length&&<form onSubmit={enviar} className="mb-5 flex flex-col gap-3 rounded-xl bg-surface p-4"><h2 className="font-semibold">Solicitar levantamiento</h2>
-        <label htmlFor="restriccion">Restricción</label><select id="restriccion" required value={id} onChange={e=>setId(e.target.value)} className="rounded-lg border border-border bg-surface p-2"><option value="">Selecciona una restricción</option>{disponibles.map(r=><option key={r.id_restriccion} value={r.id_restriccion}>{r.tipo}</option>)}</select>
+        <label htmlFor="restriccion">Restricción</label><Select id="restriccion" required value={id} onChange={e=>setId(e.target.value)} className="rounded-lg border border-border bg-surface p-2"><option value="">Selecciona una restricción</option>{disponibles.map(r=><option key={r.id_restriccion} value={r.id_restriccion}>{r.tipo}</option>)}</Select>
         <label htmlFor="motivo">Motivo (10 a 2000 caracteres)</label><textarea id="motivo" required minLength={10} maxLength={2000} value={motivo} onChange={e=>setMotivo(e.target.value)} className="min-h-28 rounded-lg border border-border p-2"/>
         <Button type="submit" cargando={enviando}>Enviar solicitud</Button>
       </form>}

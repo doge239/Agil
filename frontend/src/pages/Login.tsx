@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { useAuth } from '../context/AuthContext'
@@ -13,6 +13,8 @@ import { ThemeToggle } from '../components/ThemeToggle'
 export function Login() {
   const { login, autenticado, inicializando } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const destino = typeof location.state?.volverA === 'string' && location.state.volverA.startsWith('/asistencia/qr/') ? location.state.volverA : '/'
   const [correo, setCorreo] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +25,7 @@ export function Login() {
   }
 
   if (autenticado) {
-    return <Navigate to="/" replace />
+    return <Navigate to={destino} replace />
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -33,7 +35,7 @@ export function Login() {
 
     try {
       await login(correo, password)
-      navigate('/', { replace: true })
+      navigate(destino, { replace: true })
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {

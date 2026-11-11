@@ -1,4 +1,38 @@
 :root { color-scheme: light; }
+
+/* El nuevo tema se revela de derecha a izquierda con un borde suave. */
+html[data-theme-transition]::view-transition-group(root) {
+  animation-duration: 1500ms;
+}
+html[data-theme-transition]::view-transition-old(root),
+html[data-theme-transition]::view-transition-new(root) {
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+html[data-theme-transition]::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+html[data-theme-transition]::view-transition-new(root) {
+  z-index: 2;
+  mask-image: linear-gradient(to right, transparent 40%, #000 60%);
+  mask-size: 300% 100%;
+  mask-repeat: no-repeat;
+  animation: theme-sweep-in 1500ms cubic-bezier(.4, 0, .2, 1) both;
+}
+@keyframes theme-sweep-in {
+  from { mask-position: 0% 0; }
+  to { mask-position: 100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-transition]::view-transition-group(root),
+  html[data-theme-transition]::view-transition-old(root),
+  html[data-theme-transition]::view-transition-new(root) {
+    animation: none;
+    mask-image: none;
+  }
+}
+
 .login-page > .theme-toggle { position: fixed; top: 20px; right: 24px; z-index: 40; font-size: 11px; }
 .portal-topbar .theme-toggle { font-size: 11px; }
 html[data-theme='dark'] {

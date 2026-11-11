@@ -1,3 +1,4 @@
+import { Select } from '../components/Select'
 import { useState } from 'react'
 import { getHorario } from '../api/academico'
 import { usePeriodo } from '../context/periodo'
@@ -29,12 +30,11 @@ export function Horario() {
   const conflictos = new Set(items.flatMap((c, i) => items.some((otra, j) => i !== j && seSuperponen(c, otra)) ? [i] : []))
   const asignaturas = [...new Map(items.map(c => [c.id_asignatura, c])).values()]
   return <div className="horario-semanal">
-    <PageHeader titulo="Horario del semestre" descripcion="Tu semana por bloques. Cada color identifica una asignatura y las tarjetas muestran sus horas reales." />
+    <PageHeader titulo="Horario del semestre" />
     {loading ? <Spinner /> : error ? <ErrorBanner mensaje={error} onRetry={refetch} /> : !items.length ? <EmptyState mensaje="No hay clases registradas en este período." /> : <>
-      {data?.demostracion && <p className="horario-escenario">{data.descripcion_escenario ?? 'Horario de demostración.'}</p>}
       <div className="horario-herramientas">
         <p><strong>{asignaturas.length}</strong> asignaturas <span>·</span> <strong>{items.length}</strong> sesiones semanales</p>
-        <label>Ver día <select aria-label="Ver día" value={diaElegido} onChange={e => setDiaElegido(e.target.value)}><option value="TODOS">Semana completa</option>{dias.map(d => <option key={d} value={normalizarDia(d)}>{d}</option>)}</select></label>
+        <label>Ver día <Select aria-label="Ver día" value={diaElegido} onChange={e => setDiaElegido(e.target.value)}><option value="TODOS">Semana completa</option>{dias.map(d => <option key={d} value={normalizarDia(d)}>{d}</option>)}</Select></label>
       </div>
       {conflictos.size > 0 && <p className="horario-alerta" role="status">Hay {conflictos.size} sesiones con coincidencia de horario. Se muestran todas para que puedas identificar el cruce.</p>}
       <div className="horario-scroll" tabIndex={0} role="region" aria-label="Horario semanal por bloques, desplazamiento horizontal">
@@ -63,7 +63,7 @@ export function Horario() {
         </table>
       </div>
       <div className="horario-leyenda" aria-label="Asignaturas del horario">{asignaturas.map(c => <span key={c.id_asignatura}><i className={colores.get(c.id_asignatura)} />{c.nombre ?? `Asignatura #${c.id_asignatura}`}</span>)}</div>
-      <p className="horario-aclaracion">{bloques.some(b => b.letra === 'Especial') ? 'Las sesiones que no coinciden con A–F aparecen en filas «Especial», conservando sus horas originales. ' : ''}En móvil puedes deslizar la semana o seleccionar un solo día.</p>
+      {bloques.some(b => b.letra === 'Especial') && <p className="horario-aclaracion">Las sesiones que no coinciden con A–F aparecen en filas «Especial», conservando sus horas originales.</p>}
     </>}
   </div>
 }

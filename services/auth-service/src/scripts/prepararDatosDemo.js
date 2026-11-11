@@ -23,7 +23,11 @@ try {
   ejecutar(path.join(__dirname, 'crearAdminGeneralDemo.js'));
   ejecutar(path.join(__dirname, 'configurarEnzoItiDemo.js'));
   ejecutar(path.join(__dirname, 'crearEstudianteItiDemo.js'));
-  console.log('Datos compartidos listos: estudiante@ucn.cl, iti.demo@ucn.cl y admin.general@ucn.cl.');
+  ejecutar(path.join(__dirname, 'crearDocenteDemo.js'));
+  ejecutar(path.join(__dirname, 'crearAdminUnidadDemo.js'));
+  ejecutar(path.join(__dirname, 'crearDatosPresentacion.js'));
+  ejecutar(path.join(__dirname, 'alinearDocentePresentacion.js'));
+  console.log('Datos compartidos y escenarios de presentación listos para los cuatro módulos.');
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

@@ -1,3 +1,4 @@
+import { Select } from '../../components/Select'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -26,8 +27,8 @@ function FormCarrera({c,unidades,refrescar,cerrar}:{c:CarreraGeneral|null;unidad
     <h2 className="font-semibold sm:col-span-2">{c?'Editar carrera':'Crear carrera'}</h2>
     <Input label="Código" name="codigo" defaultValue={c?.codigo} maxLength={20} required/>
     <Input label="Nombre" name="nombre" defaultValue={c?.nombre} minLength={3} maxLength={150} required/>
-    <label className="flex flex-col gap-1">Unidad académica<select name="unidad" className={selectGeneral} defaultValue={c?.id_unidad??''} required><option value="">Selecciona unidad</option>{unidades.filter(u=>u.activo||u.id_unidad===c?.id_unidad).map(u=><option key={u.id_unidad} value={u.id_unidad}>{u.codigo} · {u.nombre}</option>)}</select></label>
-    <label className="flex flex-col gap-1">Estado<select name="estado" className={selectGeneral} defaultValue={c?.estado??'ACTIVA'}><option value="ACTIVA">Activa</option><option value="INACTIVA">Inactiva</option></select></label>
+    <label className="flex flex-col gap-1">Unidad académica<Select name="unidad" className={selectGeneral} defaultValue={c?.id_unidad??''} required><option value="">Selecciona unidad</option>{unidades.filter(u=>u.activo||u.id_unidad===c?.id_unidad).map(u=><option key={u.id_unidad} value={u.id_unidad}>{u.codigo} · {u.nombre}</option>)}</Select></label>
+    <label className="flex flex-col gap-1">Estado<Select name="estado" className={selectGeneral} defaultValue={c?.estado??'ACTIVA'}><option value="ACTIVA">Activa</option><option value="INACTIVA">Inactiva</option></Select></label>
     <Input label="Motivo" name="motivo" minLength={10} maxLength={2000} required/>
     <div className="flex items-end gap-2"><Button type="submit" cargando={op.ocupado}>Guardar carrera</Button><Button variante="secondary" onClick={cerrar}>Cancelar</Button></div>
     <ResultadoUnidad {...op}/>
@@ -54,7 +55,7 @@ function FormAsignatura({a,refrescar,cerrar}:{a:AsignaturaGeneral|null;refrescar
     <Input label="Código" name="codigo" defaultValue={a?.codigo??''} maxLength={20} required={!a||a.codigo!==null}/>
     <Input label="Nombre" name="nombre" defaultValue={a?.nombre} minLength={3} maxLength={150} required/>
     <Input label="Créditos" name="creditos" type="number" min={0} max={60} defaultValue={a?.creditos??''} required={!a||a.creditos!==null}/>
-    <label className="flex flex-col gap-1">Estado<select name="estado" className={selectGeneral} defaultValue={a?.estado??'ACTIVA'}><option value="ACTIVA">Activa</option><option value="INACTIVA">Inactiva</option></select></label>
+    <label className="flex flex-col gap-1">Estado<Select name="estado" className={selectGeneral} defaultValue={a?.estado??'ACTIVA'}><option value="ACTIVA">Activa</option><option value="INACTIVA">Inactiva</option></Select></label>
     <Input label="Descripción" name="descripcion" defaultValue={a?.descripcion??''} maxLength={4000}/>
     <Input label="Motivo" name="motivo" minLength={10} maxLength={2000} required/>
     <p className="text-sm text-muted sm:col-span-2">Si una asignatura ya está en una malla, su código y créditos se conservan. Para cambiarlos, registra otra asignatura.</p>
@@ -77,7 +78,7 @@ export function PlanesGeneral(){
   const nombre=carreras.data?.carreras.find(c=>c.id_carrera===carrera)?.nombre??`Carrera #${carrera}`
   async function crear(e:FormEvent<HTMLFormElement>){e.preventDefault();const f=e.currentTarget,d=new FormData(f);await op.ejecutar(()=>crearPlanGeneral(carrera,{nombre:String(d.get('nombre')),anio_inicio:Number(d.get('anio')),motivo:String(d.get('motivo')),id_plan_origen:d.get('origen')?Number(d.get('origen')):null}),()=>{f.reset();planes.refetch()},'Borrador creado.')}
   return <div><PageHeader titulo="Planes y mallas curriculares" descripcion={nombre}/><Link className="mb-4 inline-block text-primary underline" to="/general/carreras">Volver a carreras</Link>
-    <details className={panelGeneral}><summary className="cursor-pointer font-semibold">Crear plan de estudio</summary><form onSubmit={crear} className="mt-4 grid gap-3 sm:grid-cols-2"><Input label="Nombre del plan" name="nombre" minLength={3} maxLength={100} required/><Input label="Año de inicio" name="anio" type="number" min={2000} max={2200} required/><label className="flex flex-col gap-1">Contenido inicial<select name="origen" className={selectGeneral}><option value="">Malla vacía</option>{planes.data?.planes.map(p=><option key={p.id_plan} value={p.id_plan}>Copiar {p.nombre} · {p.estado}</option>)}</select></label><Input label="Motivo" name="motivo" minLength={10} maxLength={2000} required/><Button type="submit" cargando={op.ocupado}>Crear borrador</Button><ResultadoUnidad {...op}/></form></details>
+    <details className={panelGeneral}><summary className="cursor-pointer font-semibold">Crear plan de estudio</summary><form onSubmit={crear} className="mt-4 grid gap-3 sm:grid-cols-2"><Input label="Nombre del plan" name="nombre" minLength={3} maxLength={100} required/><Input label="Año de inicio" name="anio" type="number" min={2000} max={2200} required/><label className="flex flex-col gap-1">Contenido inicial<Select name="origen" className={selectGeneral}><option value="">Malla vacía</option>{planes.data?.planes.map(p=><option key={p.id_plan} value={p.id_plan}>Copiar {p.nombre} · {p.estado}</option>)}</Select></label><Input label="Motivo" name="motivo" minLength={10} maxLength={2000} required/><Button type="submit" cargando={op.ocupado}>Crear borrador</Button><ResultadoUnidad {...op}/></form></details>
     {planes.loading?<Spinner/>:planes.error?<ErrorBanner mensaje={planes.error} onRetry={planes.refetch}/>:!planes.data?.planes.length?<EmptyState mensaje="No hay planes. Crea el primer borrador."/>:planes.data.planes.map(p=><article key={p.id_plan} className={panelGeneral}><Badge estado={p.estado}/><h2 className="my-2 font-semibold">{p.nombre} · {p.anio_inicio}</h2><Link className="text-primary underline" to={`/general/planes/${p.id_plan}`}>{p.estado==='BORRADOR'?'Editar y publicar malla':'Consultar malla y administrar estado'}</Link></article>)}
   </div>
 }

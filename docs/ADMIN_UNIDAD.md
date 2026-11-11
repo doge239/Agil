@@ -23,7 +23,8 @@ Usuarios ahora utiliza también `CATALOGO_SERVICE_URL` para limitar estudiantes 
 carreras de la unidad. Compose ya la configura; en local usa `http://localhost:4003`.
 Recrear Usuarios tras configurar: `docker compose up -d usuarios-service`.
 
-Cuenta de demostración opcional:
+La cuenta de demostración se prepara automáticamente con `datos-demo`. Para repetir
+su aprovisionamiento por separado:
 
 ```powershell
 docker compose exec -T auth-service node src/scripts/crearAdminUnidadDemo.js

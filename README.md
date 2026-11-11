@@ -94,6 +94,10 @@ antes de iniciar Usuarios, Catálogo y Académico. Todos reciben la cuenta
 **Capstone pendiente** y **11 sesiones de horario**. También prepara `iti.demo@ucn.cl`
 con su escenario independiente. Son datos de demostración versionados en el repositorio.
 
+La carga compartida incluye notas, asistencia, encuestas, solicitudes y escenarios para
+los cuatro perfiles. Las cuentas y el recorrido por cada requisito están en la
+[Guía de presentación](docs/PRESENTACION.md).
+
 Quienes ya tienen el proyecto solo deben actualizar el código y ejecutar
 `docker compose up -d --build`; se conservan los volúmenes, las contraseñas y los resultados
 existentes. No es necesario borrar las bases. Las modificaciones que cada integrante haga

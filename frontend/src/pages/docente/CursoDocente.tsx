@@ -1,8 +1,10 @@
+import { Select } from '../../components/Select'
+import { AsistenciaCurso } from './AsistenciaCurso'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getCursosDocente, getEstudiantesCurso, getEvaluaciones, guardarEvaluacion, getNotasDocente, guardarNotas, getClases, crearClase, getAsistenciasDocente, guardarAsistencias, getHistorialDocente } from '../../api/docente'
-import type { EstudianteCurso, EvaluacionDocente, NotaDocente, AsistenciaDocente } from '../../api/docente'
+import { getCursosDocente, getEstudiantesCurso, getEvaluaciones, guardarEvaluacion, getNotasDocente, guardarNotas, getHistorialDocente } from '../../api/docente'
+import type { EstudianteCurso, EvaluacionDocente, NotaDocente } from '../../api/docente'
 import { usePeriodo } from '../../context/periodo'
 import { useFetch } from '../../hooks/useFetch'
 import { PageHeader } from '../../components/PageHeader'
@@ -13,7 +15,7 @@ import { EmptyState } from '../../components/EmptyState'
 import { Spinner } from '../../components/Spinner'
 import { Badge } from '../../components/Badge'
 import { getErrorMessage } from '../../utils/errors'
-import { formatFecha, formatHora } from '../../utils/format'
+import { formatFecha } from '../../utils/format'
 
 function nombre(e:EstudianteCurso) {return `${e.apellido_paterno} ${e.apellido_materno??''}, ${e.nombres}`}
 function useOperacion() {
@@ -77,52 +79,10 @@ function NotasCurso({curso,estudiantes,bloqueado}:{curso:number;estudiantes:Estu
     <FormularioEvaluacion curso={curso} alGuardar={refetch} bloqueado={bloqueado}/>
     {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!elegida?<EmptyState mensaje="Crea una evaluación para registrar notas."/>:<>
       <p className="mb-3 text-sm">Ponderación total configurada: {evaluaciones.reduce((s,e)=>s+Number(e.porcentaje),0)}%</p>
-      <label className="mb-3 flex flex-wrap items-center gap-3">Evaluación<select className="rounded-lg border border-border bg-surface p-2" value={elegida.id_evaluacion} onChange={e=>{setSeleccion(Number(e.target.value));setEditar(false)}}>{evaluaciones.map(e=><option key={e.id_evaluacion} value={e.id_evaluacion}>{e.nombre} · {e.porcentaje}%</option>)}</select></label>
+      <label className="mb-3 flex flex-wrap items-center gap-3">Evaluación<Select className="rounded-lg border border-border bg-surface p-2" value={elegida.id_evaluacion} onChange={e=>{setSeleccion(Number(e.target.value));setEditar(false)}}>{evaluaciones.map(e=><option key={e.id_evaluacion} value={e.id_evaluacion}>{e.nombre} · {e.porcentaje}%</option>)}</Select></label>
       <Button variante="secondary" className="mb-3" onClick={()=>setEditar(!editar)} disabled={bloqueado}>{editar?'Cerrar edición':'Editar evaluación'}</Button>
       {editar&&<FormularioEvaluacion key={`${elegida.id_evaluacion}-${elegida.version}`} curso={curso} evaluacion={elegida} alGuardar={()=>{setEditar(false);refetch()}} bloqueado={bloqueado}/>}
       <NotasEvaluacion key={elegida.id_evaluacion} curso={curso} evaluacion={elegida.id_evaluacion} estudiantes={estudiantes} bloqueado={bloqueado}/>
-    </>}
-  </section>
-}
-function EditorAsistencia({curso,clase,estudiantes,filas,alGuardar,bloqueado}:{curso:number;clase:number;estudiantes:EstudianteCurso[];filas:AsistenciaDocente[];alGuardar:()=>void;bloqueado:boolean}) {
-  const [cambios,setCambios]=useState<Record<number,{estado:string;observacion:string}>>({}),op=useOperacion()
-  function cambiar(a:AsistenciaDocente,valor:Partial<{estado:string;observacion:string}>) {
-    const anterior=cambios[a.id_estudiante]??{estado:a.estado??'',observacion:a.observacion??''}
-    setCambios({...cambios,[a.id_estudiante]:{...anterior,...valor}})
-  }
-  async function guardar(e:FormEvent) {
-    e.preventDefault();const asistencias=filas.filter(a=>cambios[a.id_estudiante]).map(a=>({id_estudiante:a.id_estudiante,...cambios[a.id_estudiante],version:a.version}))
-    await op.ejecutar(()=>guardarAsistencias(curso,clase,asistencias),alGuardar,'Asistencia guardada.')
-  }
-  return <form onSubmit={guardar} className="rounded-xl bg-surface p-4"><Resultado {...op}/><p className="mb-3 text-sm text-muted">Una fila sin estado queda pendiente; no se convierte automáticamente en ausencia.</p>
-    <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr><th className="p-2">Estudiante</th><th className="p-2">Estado</th><th className="p-2">Observación</th></tr></thead><tbody>{filas.map(a=>{
-      const e=estudiantes.find(e=>e.id_estudiante===a.id_estudiante)
-      const deshabilitado=bloqueado||op.ocupado||a.estado_inscripcion!=='ACTIVA'
-      return <tr key={a.id_estudiante} className="border-t border-border"><td className="p-2">{e?nombre(e):`Estudiante #${a.id_estudiante}`}</td><td className="p-2"><select aria-label={`Asistencia de ${e?nombre(e):a.id_estudiante}`} className="rounded-lg border border-border bg-surface p-2" value={cambios[a.id_estudiante]?.estado??a.estado??''} required={!!cambios[a.id_estudiante]} disabled={deshabilitado} onChange={ev=>cambiar(a,{estado:ev.target.value})}><option value="">Pendiente</option>{['PRESENTE','AUSENTE','JUSTIFICADO','ATRASADO'].map(s=><option key={s} value={s}>{s}</option>)}</select></td><td className="p-2"><input aria-label={`Observación de ${e?nombre(e):a.id_estudiante}`} className="rounded-lg border border-border bg-surface p-2" maxLength={500} value={cambios[a.id_estudiante]?.observacion??a.observacion??''} disabled={deshabilitado} onChange={ev=>cambiar(a,{observacion:ev.target.value})}/></td></tr>
-    })}</tbody></table></div>
-    {!filas.length&&<EmptyState mensaje="No hay estudiantes inscritos a la fecha de esta clase."/>}
-    <Button className="mt-3" type="submit" cargando={op.ocupado} disabled={bloqueado||!Object.keys(cambios).length}>Guardar asistencia modificada</Button>
-  </form>
-}
-function AsistenciaClase({curso,clase,estudiantes,bloqueado}:{curso:number;clase:number;estudiantes:EstudianteCurso[];bloqueado:boolean}) {
-  const {data,loading,error,refetch}=useFetch(()=>getAsistenciasDocente(curso,clase),[curso,clase])
-  const [mensaje,setMensaje]=useState('')
-  if(loading)return <Spinner/>
-  if(error)return <ErrorBanner mensaje={error} onRetry={refetch}/>
-  return <><Resultado error="" mensaje={mensaje}/><Button variante="secondary" className="mb-3" onClick={()=>{setMensaje('');refetch()}}>Recargar asistencia</Button><EditorAsistencia curso={curso} clase={clase} estudiantes={estudiantes} filas={data?.asistencias??[]} alGuardar={()=>{setMensaje('Asistencia guardada.');refetch()}} bloqueado={bloqueado}/></>
-}
-function AsistenciaCurso({curso,estudiantes,bloqueado}:{curso:number;estudiantes:EstudianteCurso[];bloqueado:boolean}) {
-  const {data,loading,error,refetch}=useFetch(()=>getClases(curso),[curso]);const [seleccion,setSeleccion]=useState<number|undefined>(),op=useOperacion()
-  const clases=data?.clases??[],elegida=clases.find(c=>c.id_clase===seleccion)??clases[0]
-  async function enviar(e:FormEvent<HTMLFormElement>) {
-    e.preventDefault();const form=e.currentTarget,datos=new FormData(form)
-    await op.ejecutar(()=>crearClase(curso,{fecha:String(datos.get('fecha')),hora_inicio:String(datos.get('hora_inicio')),hora_fin:String(datos.get('hora_fin'))}),()=>{form.reset();setSeleccion(undefined);refetch()},'Clase creada.')
-  }
-  return <section><h2 className="mb-3 text-lg font-semibold">Clases y asistencia</h2>
-    <form onSubmit={enviar} className="mb-4 rounded-xl bg-surface p-4"><h3 className="mb-3 font-semibold">Registrar clase</h3><fieldset disabled={bloqueado||op.ocupado} className="grid gap-3 sm:grid-cols-3"><Input label="Fecha" name="fecha" type="date" required/><Input label="Hora de inicio" name="hora_inicio" type="time" required/><Input label="Hora de término" name="hora_fin" type="time" required/><Button type="submit" cargando={op.ocupado}>Crear clase</Button></fieldset><Resultado {...op}/></form>
-    {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:!elegida?<EmptyState mensaje="No hay clases registradas."/>:<>
-      <label className="mb-4 flex flex-wrap items-center gap-3">Clase<select className="rounded-lg border border-border bg-surface p-2" value={elegida.id_clase} onChange={e=>setSeleccion(Number(e.target.value))}>{clases.map(c=><option key={c.id_clase} value={c.id_clase}>{formatFecha(c.fecha)} · {formatHora(c.hora_inicio)}–{formatHora(c.hora_fin)}</option>)}</select></label>
-      <AsistenciaClase key={elegida.id_clase} curso={curso} clase={elegida.id_clase} estudiantes={estudiantes} bloqueado={bloqueado}/>
     </>}
   </section>
 }
@@ -153,6 +113,6 @@ export function CursoDocente() {
     {curso.id_periodo!==periodo&&<p className="mb-3 rounded-lg bg-surface p-3 text-sm">Estás consultando el curso del período {curso.anio}/{curso.semestre}. Para cambiar de curso, vuelve a Mis cursos.</p>}
     {bloqueado&&<p className="mb-3 rounded-lg bg-surface p-3">Curso o período cerrado: solo consulta.</p>}
     <nav aria-label="Gestión del curso" className="mb-5 flex flex-wrap gap-2">{[['estudiantes','Estudiantes'],['notas','Notas'],['asistencia','Asistencia'],['historial','Historial']].map(([clave,titulo])=><Button key={clave} variante={pestana===clave?'primary':'secondary'} aria-pressed={pestana===clave} onClick={()=>setPestana(clave)}>{titulo}</Button>)}</nav>
-    {pestana==='estudiantes'?<Nomina estudiantes={estudiantes}/>:pestana==='notas'?<NotasCurso key={id} curso={id} estudiantes={estudiantes} bloqueado={bloqueado}/>:pestana==='asistencia'?<AsistenciaCurso key={id} curso={id} estudiantes={estudiantes} bloqueado={bloqueado}/>:<Historial key={id} curso={id} estudiantes={estudiantes}/>}
+    {pestana==='estudiantes'?<Nomina estudiantes={estudiantes}/>:pestana==='notas'?<NotasCurso key={id} curso={id} estudiantes={estudiantes} bloqueado={bloqueado}/>:pestana==='asistencia'?<AsistenciaCurso key={id} curso={id} estudiantes={estudiantes} horarios={curso.horarios} bloqueado={bloqueado}/>:<Historial key={id} curso={id} estudiantes={estudiantes}/>}
   </div>
 }

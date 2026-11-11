@@ -15,6 +15,11 @@ El horario incluye 11 sesiones semanales de ejemplo, con horas y salas ficticias
 La cuenta `iti.demo@ucn.cl` / `123456` tiene un escenario separado con aprobaciones,
 una reprobación y asignaturas de quinto semestre inscritas.
 
+La carga incluye también los [datos para presentar los cuatro módulos](PRESENTACION.md):
+notas parciales, asistencia, encuestas, solicitudes con distintos estados, docentes,
+administrador de unidad, tres estudiantes de primer semestre, oferta con lista de espera
+y una carrera con malla sintética. La guía contiene las cuentas y el recorrido por apartado.
+
 ## Archivos que generan los datos
 
 La preparación compartida crea también `admin.general@ucn.cl` con contraseña inicial
@@ -30,6 +35,13 @@ ni cambiar contraseñas existentes. Cada integrante debe actualizar el código y
   electivos, inscripciones y horario del estudiante principal.
 - `services/auth-service/src/scripts/crearEstudianteItiDemo.js`: segunda cuenta de prueba.
 - `services/auth-service/src/scripts/crearAdminGeneralDemo.js`: cuenta y perfil de Administración General.
+- `services/auth-service/src/scripts/crearDocenteDemo.js`: cuenta docente de EIC.
+- `services/auth-service/src/scripts/crearAdminUnidadDemo.js`: administrador de EIC.
+- `services/auth-service/src/scripts/crearDatosPresentacion.js`: docente ITI, nóminas,
+  evaluaciones, asistencias, encuestas, solicitudes y catálogo de presentación.
+- `services/auth-service/src/scripts/alinearDocentePresentacion.js`: asigna al docente principal
+  los mismos cursos de Enzo y traslada los demás ejemplos a la cuenta secundaria, sin borrar
+  notas ni asistencias. El ajuste se ejecuta una sola vez por período.
 - `services/auth-service/src/scripts/prepararDatosDemo.js`: coordina migraciones y escenarios.
 
 Compose ejecuta `auth-seed` y luego `datos-demo` cuando las bases están listas. Los servicios
@@ -45,8 +57,9 @@ conservando su historial, para mostrar el horario ITI.
 
 Este mecanismo comparte un escenario inicial reproducible. No replica los cambios posteriores
 de cada integrante ni reemplaza sus bases con una copia exacta de otra máquina. Las notas por
-evaluación y asistencias iniciales del plan ICI permanecen en su historial; el escenario ITI
-agrega resultados finales y horario, sin inventar evaluaciones, asistencias o docentes nuevos.
+evaluación y asistencias iniciales del plan ICI permanecen en su historial. La carga de
+presentación agrega evaluaciones, asistencias y docentes sintéticos a los cursos actuales
+ITI, sin modificar notas ni asistencias anteriores.
 
 ## Comprobar o volver a ejecutar
 

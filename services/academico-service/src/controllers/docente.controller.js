@@ -1,6 +1,8 @@
 const pool = require('../config/database');
 const axios = require('axios');
 const { exigir, idPositivo, texto } = require('../domain/estudiante');
+const revisionAsistencia = `COALESCE((SELECT md5(string_agg(a.id_asistencia::text||':'||a.version::text,',' ORDER BY a.id_asistencia))
+  FROM asistencia a WHERE a.id_clase=cl.id_clase),md5(''))`;
 
 async function consultar(req, variable, ruta) {
   try {
@@ -141,10 +143,35 @@ exports.guardarNotas=docente(async(req,res,p)=> {
 exports.historial=docente(async(req,res,p)=> {
   const c=await curso(req,p);
   res.json({historial:(await pool.query(`SELECT id_auditoria,accion,detalle,fecha FROM auditoria_academica
-    WHERE detalle->>'id_curso'=$1 AND accion IN ('DOCENTE_NOTA','DOCENTE_EVALUACION','DOCENTE_ASISTENCIA','DOCENTE_CLASE') ORDER BY id_auditoria DESC LIMIT 200`,[String(c.id_curso)])).rows});
+    WHERE detalle->>'id_curso'=$1 AND accion IN ('DOCENTE_NOTA','DOCENTE_EVALUACION','DOCENTE_ASISTENCIA','DOCENTE_CLASE','DOCENTE_ELIMINAR_CLASE','DOCENTE_QR_ABRIR','DOCENTE_QR_CERRAR') ORDER BY id_auditoria DESC LIMIT 200`,[String(c.id_curso)])).rows});
 });
 exports.clases=docente(async(req,res,p)=> {
-  const c=await curso(req,p);res.json({clases:(await pool.query('SELECT * FROM clase WHERE id_curso=$1 ORDER BY fecha DESC,hora_inicio DESC,id_clase DESC',[c.id_curso])).rows});
+  const c=await curso(req,p);res.set('Cache-Control','no-store').json({clases:(await pool.query(`SELECT cl.*,
+    (SELECT count(*)::int FROM asistencia a WHERE a.id_clase=cl.id_clase) AS asistencias_registradas,
+    ${revisionAsistencia} AS revision_asistencia
+    FROM clase cl WHERE id_curso=$1 ORDER BY fecha DESC,hora_inicio DESC,id_clase DESC`,[c.id_curso])).rows});
+});
+exports.eliminarClase=docente(async(req,res,p)=> {
+  const id=idPositivo(req.params.idClase,'Clase');
+  exigir(req.body.confirmar===true,400,'Debes confirmar la eliminación de la clase y su asistencia');
+  const motivo=texto(req.body.motivo,10,2000,'Motivo de eliminación');
+  exigir(typeof req.body.revision_asistencia==='string'&&/^[a-f0-9]{32}$/.test(req.body.revision_asistencia),400,'Actualiza la clase antes de eliminarla');
+  const resultado=await transaccion(async db=> {
+    const c=await curso(req,p,db,true);
+    const clase=(await db.query(`SELECT cl.*,${revisionAsistencia} AS revision_asistencia
+      FROM clase cl WHERE id_clase=$1 AND id_curso=$2 FOR UPDATE OF cl`,[id,c.id_curso])).rows[0];
+    exigir(clase,404,'Clase no encontrada en este curso');
+    exigir(clase.revision_asistencia===req.body.revision_asistencia,409,'La asistencia de esta clase cambió. Cancela y vuelve a revisar la clase antes de eliminarla.');
+    const asistencias=(await db.query('SELECT * FROM asistencia WHERE id_clase=$1 FOR UPDATE',[id])).rows;
+    const sesiones=(await db.query('SELECT * FROM sesion_asistencia_qr WHERE id_clase=$1 FOR UPDATE',[id])).rows;
+    await auditar(db,req,'DOCENTE_ELIMINAR_CLASE',{id_curso:c.id_curso,id_clase:id,motivo,
+      anterior:{clase,asistencias,sesiones},nuevo:{nombre:'Clase y asistencia eliminadas'}});
+    await db.query('DELETE FROM asistencia WHERE id_clase=$1',[id]);
+    await db.query('DELETE FROM sesion_asistencia_qr WHERE id_clase=$1',[id]);
+    await db.query('DELETE FROM clase WHERE id_clase=$1 AND id_curso=$2',[id,c.id_curso]);
+    return {id_clase:id,asistencias_eliminadas:asistencias.length};
+  });
+  res.json({mensaje:'Clase y asistencia eliminadas',...resultado});
 });
 exports.crearClase=docente(async(req,res,p)=> {
   const fechaClase=fecha(req.body.fecha);const {hora_inicio,hora_fin}=req.body;
@@ -181,8 +208,10 @@ exports.guardarAsistencias=docente(async(req,res,p)=> {
       const anterior=anteriores.find(r=>r.id_estudiante===a.id_estudiante)||null;
       exigir((anterior?.version??0)===a.version,409,'Una asistencia cambió. Actualiza antes de guardar.');
       await db.query(`INSERT INTO asistencia(id_clase,id_estudiante,estado,observacion) VALUES($1,$2,$3,$4)
-        ON CONFLICT(id_clase,id_estudiante) DO UPDATE SET estado=$3,observacion=$4,version=asistencia.version+1`,[id,a.id_estudiante,a.estado,a.observacion?.trim()||null]);
+        ON CONFLICT(id_clase,id_estudiante) DO UPDATE SET estado=$3,observacion=$4,origen='MANUAL',id_sesion_qr=NULL,version=asistencia.version+1`,[id,a.id_estudiante,a.estado,a.observacion?.trim()||null]);
       await auditar(db,req,'DOCENTE_ASISTENCIA',{id_curso:c.id_curso,id_clase:id,id_estudiante:a.id_estudiante,anterior,nuevo:a});
     }
   });res.json({mensaje:'Asistencia guardada'});
 });
+// Contexto compartido con el flujo QR: conserva los mismos permisos y bloqueos de curso.
+exports.contextoDocente = {docente, curso, transaccion, auditar, consultar};

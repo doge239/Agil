@@ -5,7 +5,8 @@ import { Sidebar } from './Sidebar'
 import { PeriodoProvider } from '../context/PeriodoContext'
 
 export function Layout() {
-  const general=useLocation().pathname.startsWith('/general')
+  const ruta=useLocation().pathname
+  const general=ruta.startsWith('/general')
   return (
     <div className="portal-shell min-h-screen">
       <a className="portal-skip-link" href="#contenido-principal">Saltar al contenido</a>
@@ -15,7 +16,7 @@ export function Layout() {
         <Sidebar />
         <main id="contenido-principal" className="portal-main min-w-0 flex-1" tabIndex={-1}>
           {general?<Outlet/>:<PeriodoProvider><Outlet /></PeriodoProvider>}
-          <footer className="portal-footer"><span>Banner UCN</span><span>Tu espacio académico · Universidad Católica del Norte</span></footer>
+          {ruta!=='/avance'&&<footer className="portal-footer"><span>Banner UCN</span><span>Universidad Católica del Norte</span></footer>}
         </main>
       </div>
     </div>

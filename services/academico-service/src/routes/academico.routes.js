@@ -30,6 +30,9 @@ router.get(
 );
 
 router.use(verificarToken);
+const qr = require('../controllers/asistencia-qr.controller');
+router.get('/asistencia-qr/:token',qr.consultarEstudiante);
+router.post('/asistencia-qr/:token',qr.marcar);
 router.use('/general',require('./general.routes'));
 router.use('/docente',require('./docente.routes'));
 router.use('/unidad',require('./unidad.routes'));

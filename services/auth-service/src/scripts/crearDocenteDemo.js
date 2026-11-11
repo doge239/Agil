@@ -1,4 +1,4 @@
-// Aprovisionamiento explícito de desarrollo. No se ejecuta en el arranque ni cambia contraseñas existentes.
+// Aprovisionamiento compartido de desarrollo. No cambia contraseñas existentes.
 require('dotenv').config();
 const {Client}=require('pg');
 const bcrypt=require('bcrypt');
@@ -40,7 +40,10 @@ async function main() {
     if(docente.id_unidad!==unidad.id_unidad)throw new Error('El docente pertenece a otra unidad; no se modificó');
     await usuarios.query('COMMIT');
     await academico.query('BEGIN');
-    const cursos=await academico.query(`INSERT INTO curso_docente(id_curso,id_docente)
+    const alineado=await academico.query(`SELECT 1 FROM auditoria_academica WHERE accion='DEMO_DOCENTE_MISMOS_RAMOS_V1'
+      AND detalle->>'id_periodo'=(SELECT id_periodo::text FROM periodo_academico WHERE estado='ACTIVO'
+        AND CURRENT_DATE BETWEEN fecha_inicio AND fecha_fin ORDER BY anio DESC,semestre DESC LIMIT 1)`);
+    const cursos=alineado.rowCount?{rowCount:0}:await academico.query(`INSERT INTO curso_docente(id_curso,id_docente)
       SELECT c.id_curso,$1 FROM curso c WHERE c.id_unidad=$2 AND c.seccion=1 AND c.id_asignatura=ANY($3::int[])
       AND c.id_periodo=(SELECT id_periodo FROM periodo_academico WHERE estado='ACTIVO' ORDER BY anio DESC,semestre DESC LIMIT 1)
       ON CONFLICT(id_curso,id_docente) DO NOTHING RETURNING id_curso`,[docente.id_docente,unidad.id_unidad,asignaturas.map(a=>a.id_asignatura)]);

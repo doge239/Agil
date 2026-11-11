@@ -158,6 +158,14 @@ app.patch('/api/academico/administracion/periodos/:idPeriodo/inscripcion',(req,r
 app.put('/api/academico/administracion/inscripciones/:idInscripcion/resultado',(req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 
 const PORT = process.env.PORT || 4000;
+app.delete('/api/academico/docente/cursos/:idCurso/clases/:idClase',
+  (req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
+for (const metodo of ['get','post']) app[metodo]('/api/academico/asistencia-qr/:token',
+  (req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
+for (const metodo of ['get','post','delete']) app[metodo]('/api/academico/docente/cursos/:idCurso/clases/:idClase/qr',
+  (req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
+app.get('/api/academico/docente/cursos/:idCurso/asistencia-resumen',
+  (req,res)=>reenviarPeticion(req,res,`${process.env.ACADEMICO_SERVICE_URL}${req.path.slice(4)}`));
 for(const [metodo,rutas] of Object.entries({
   get:['resumen','periodos','estudiantes','restricciones','auditoria','cursos'],
   post:['periodos','restricciones','cursos'],

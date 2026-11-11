@@ -1,3 +1,4 @@
+import { Select } from '../components/Select'
 import { useState } from 'react'
 import { PeriodoContext } from './periodo'
 import type { ReactNode } from 'react'
@@ -20,9 +21,9 @@ export function PeriodoProvider({children}:{children:ReactNode}) {
     <div className="period-bar glass-panel">
       <div className="period-breadcrumb"><span>Mi portal</span><PortalIcon name="chevron" /><strong>{getNavItems(path).find(p=>p.to===path)?.label ?? 'Información académica'}</strong></div>
       {loading?<Spinner/>:error?<ErrorBanner mensaje={error} onRetry={refetch}/>:<label className="period-selector"><PortalIcon name="calendar" /><span>Período académico</span>
-        <select className="rounded-lg border border-border bg-surface p-2" value={id??''} onChange={e=>setSeleccion(Number(e.target.value))}>
+        <Select className="rounded-lg border border-border bg-surface p-2" value={id??''} onChange={e=>setSeleccion(Number(e.target.value))}>
           {periodos.length===0?<option value="">Sin períodos registrados</option>:periodos.map(p=><option key={p.id_periodo} value={p.id_periodo}>{p.anio} · Semestre {p.semestre}{p.vigente?' · Vigente':''}</option>)}
-        </select>
+        </Select>
       </label>}
     </div>
     {!loading&&!error&&id?children:null}

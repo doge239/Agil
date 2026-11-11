@@ -1,5 +1,10 @@
 const router = require('express').Router();
 const c = require('../controllers/docente.controller');
+const qr = require('../controllers/asistencia-qr.controller');
+router.get('/cursos/:idCurso/asistencia-resumen',qr.resumen);
+router.get('/cursos/:idCurso/clases/:idClase/qr',qr.obtener);
+router.post('/cursos/:idCurso/clases/:idClase/qr',qr.abrir);
+router.delete('/cursos/:idCurso/clases/:idClase/qr',qr.cerrar);
 router.get('/periodos',c.periodos);
 router.get('/cursos',c.cursos);
 router.get('/cursos/:idCurso/inscripciones',c.inscripciones);
@@ -12,6 +17,7 @@ router.put('/cursos/:idCurso/evaluaciones/:idEvaluacion/notas',c.guardarNotas);
 router.get('/cursos/:idCurso/historial',c.historial);
 router.get('/cursos/:idCurso/clases',c.clases);
 router.post('/cursos/:idCurso/clases',c.crearClase);
+router.delete('/cursos/:idCurso/clases/:idClase',c.eliminarClase);
 router.get('/cursos/:idCurso/clases/:idClase/asistencias',c.asistencias);
 router.put('/cursos/:idCurso/clases/:idClase/asistencias',c.guardarAsistencias);
 module.exports=router;

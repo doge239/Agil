@@ -68,8 +68,9 @@ quieren ejecutar sus pruebas dentro de Docker. Las pruebas no necesitan Docker.
   El avance cuenta cada asignatura una vez; aprobar en un intento posterior acredita sus créditos.
   No se implementan equivalencias ni bolsas de electivos: el denominador es la suma de la malla asignada.
 - Asistencia muestra clases realizadas desde la inscripción y cualquier registro ya existente.
-  Pendiente no significa ausente. El porcentaje mostrado es de estados PRESENTE sobre registros
-  confirmados; no determina aprobación ni aplica una política institucional para atrasos/justificaciones.
+  Pendiente no significa ausente. El porcentaje suma PRESENTE y JUSTIFICADO sobre los registros
+  confirmados; los atrasos históricos se presentan como asistencia. Las justificaciones mantienen
+  su estado y cuadro amarillo. Este porcentaje no determina por sí solo la aprobación.
 - Encuesta: escala 1–5, todas las preguntas obligatorias, una respuesta por estudiante/encuesta,
   inscripción válida y plazo habilitado. No se exponen respuestas individuales al docente.
   Se conserva vínculo interno para evitar duplicados: no se afirma anonimato absoluto.

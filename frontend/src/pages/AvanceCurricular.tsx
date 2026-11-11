@@ -1,3 +1,4 @@
+import { Select } from '../components/Select'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAvance } from '../api/estudiante'
@@ -51,7 +52,6 @@ export function AvanceCurricular() {
         </section>
         <div className="avance-enlaces"><Link to="/notas">Ver mis calificaciones ↗</Link><Link to="/solicitudes">Ver mis situaciones ↗</Link></div>
       </div>
-      {data.demostracion && <details className="avance-demo"><summary>Datos de demostración <span>Ver información</span></summary><p>{data.descripcion_escenario ?? 'Cuenta de demostración · Las notas e inscripciones de esta malla son ficticias y sirven para probar los estados.'}</p></details>}
       {data.sin_historial && <p className="avance-aviso" role="status">Todavía no tienes historial académico. Puedes explorar la malla y consultar los requisitos de cada ramo.</p>}
       <div className="avance-leyenda" aria-label="Leyenda de la malla">
         <span><i className="marca-aprobada" />✓ Aprobado</span><span><i className="marca-curso" />◷ Inscrito este semestre</span><span><i className="marca-reprobada" />× Reprobado</span>
@@ -59,20 +59,18 @@ export function AvanceCurricular() {
       </div>
       <div className="avance-herramientas">
         <label className="avance-busqueda"><span>Buscar ramo</span><input type="search" placeholder="Nombre o código…" value={busqueda} onChange={e => setBusqueda(e.target.value)} /></label>
-        <label><span>Mostrar</span><select aria-label="Mostrar" value={filtro} onChange={e => setFiltro(e.target.value)}>
+        <label><span>Mostrar</span><Select aria-label="Mostrar" value={filtro} onChange={e => setFiltro(e.target.value)}>
           <option value="TODAS">Todos los estados</option><option value="APROBADA">Aprobados</option><option value="EN_CURSO">Inscritos</option><option value="REPROBADA">Reprobados</option>
           <option value="DISPONIBLE">Disponibles para cursar</option><option value="BLOQUEADA">Bloqueados por requisitos</option><option value="POR_CONFIRMAR">Requisitos por confirmar</option>
-        </select></label>
-        <label><span>Ir al semestre</span><select aria-label="Ir al semestre" defaultValue="" onChange={e => document.getElementById(`avance-semestre-${e.target.value}`)?.querySelector('h2')?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })}>
+        </Select></label>
+        <label><span>Ir al semestre</span><Select aria-label="Ir al semestre" defaultValue="" onChange={e => document.getElementById(`avance-semestre-${e.target.value}`)?.querySelector('h2')?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })}>
           <option value="" disabled>Selecciona…</option>{semestres.map((s, i) => <option key={s} value={i + 1}>{s}</option>)}
-        </select></label>
+        </Select></label>
         <p aria-live="polite">{visibles.length} ramos{seleccionada && <button className="avance-limpiar" onClick={() => setSeleccion(null)}>Quitar resaltado</button>}</p>
       </div>
       {seleccionada && <p className="avance-relaciones">Explorando <strong>{nombre(seleccionada)}</strong> · <span>Azul: prerrequisitos</span> · <span>Violeta: ramos para los que es requisito</span></p>}
       <p className="avance-ayuda-movil">Desliza la malla horizontalmente para recorrer los ocho semestres.</p>
       {!ampliada && <MallaGrid asignaturas={data.asignaturas} visibles={visibles} seleccion={seleccion} onSeleccionar={seleccionar} />}
-      <p className="avance-nota">La disponibilidad es académica. La inscripción también depende de oferta, cupos, horarios y restricciones. Solo una nota final cerrada acredita aprobación.</p>
-      {data.plan.observaciones && <details className="avance-fuentes"><summary>Sobre este plan y los datos por confirmar</summary><p>{data.plan.observaciones}</p>{data.plan.fuente && <a href={data.plan.fuente} target="_blank" rel="noreferrer">Consultar programas de ITI en UCN ↗</a>}</details>}
     </>}
     <dialog ref={vistaCompleta} className="avance-vista-completa" aria-labelledby="malla-completa-titulo" onClose={() => setAmpliada(false)}>
       {ampliada && data && <div className="avance-vista-contenido">

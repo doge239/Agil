@@ -52,7 +52,7 @@ export function Dashboard() {
           <span className="dashboard-calendar-icon"><PortalIcon name="calendar" /></span>
         </Link>
       </div>
-      <div className="dashboard-section-title"><h2>Explora tu portal</h2><span>Todo lo que necesitas, a un clic</span></div>
+      <div className="dashboard-section-title"><h2>Explora tu portal</h2></div>
       <div className="dashboard-accesses">
         {accesos.filter(a=>!['/avance','/horario'].includes(a.to)).map((acceso) => (
           <Link

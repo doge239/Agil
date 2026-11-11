@@ -4,7 +4,7 @@ export const TOKEN_KEY = 'banner_token'
 export const USER_KEY = 'banner_user'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || '/api',
 })
 
 api.interceptors.request.use((config) => {

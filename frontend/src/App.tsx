@@ -3,6 +3,8 @@ import { Layout } from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthProvider'
 import { Asistencia } from './pages/Asistencia'
+import { MarcarAsistenciaQr } from './pages/MarcarAsistenciaQr'
+import { asistenciaQrHabilitada } from './config/funciones'
 import { Carreras } from './pages/Carreras'
 import { Dashboard } from './pages/Dashboard'
 import { Horario } from './pages/Horario'
@@ -35,6 +37,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
 
           <Route element={<ProtectedRoute roles={['ESTUDIANTE']} />}>
+            <Route path="/asistencia/qr/:token" element={asistenciaQrHabilitada?<MarcarAsistenciaQr />:<Navigate to="/asistencia" replace />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/perfil" element={<MiPerfil />} />
