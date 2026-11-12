@@ -51,7 +51,7 @@ export function Login() {
         <span className="page-eyebrow">TU ESPACIO ACADÉMICO</span>
         <h2>Tu universidad.<br />Siempre contigo.</h2>
         <p>Un lugar para organizar tu semestre, conocer tu avance y dar el siguiente paso en tu carrera.</p>
-        <div className="login-story-note">UNIVERSIDAD CATÓLICA DEL NORTE · PORTAL ACADÉMICO</div>
+        <div className="login-story-note">UNIVERSIDAD CATÓLICA DEL NORTE</div>
       </section>
       <div>
         <form
